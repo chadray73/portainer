@@ -23,7 +23,7 @@ import {
   TableTitle,
 } from '@@/datatables';
 import { multiple } from '@@/datatables/filter-types';
-import { useTableSettings } from '@@/datatables/useTableSettings';
+import { useOldTableSettings } from '@@/datatables/useOldTableSettings';
 import { SearchBar, useSearchBarState } from '@@/datatables/SearchBar';
 import { useRowSelect } from '@@/datatables/useRowSelect';
 import { Checkbox } from '@@/form-components/Checkbox';
@@ -46,7 +46,7 @@ export function ContainersDatatable({
   tableKey,
   onRemoveClick,
 }: Props) {
-  const { settings, setTableSettings } = useTableSettings<TableSettings>();
+  const { settings, setTableSettings } = useOldTableSettings<TableSettings>();
   const [searchBarValue, setSearchBarValue] = useSearchBarState(tableKey);
 
   const columns = useColumns();

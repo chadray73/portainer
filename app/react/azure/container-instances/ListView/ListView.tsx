@@ -9,7 +9,7 @@ import { useContainerGroups } from '@/react/azure/queries/useContainerGroups';
 import { useSubscriptions } from '@/react/azure/queries/useSubscriptions';
 
 import { PageHeader } from '@@/PageHeader';
-import { TableSettingsProvider } from '@@/datatables/useTableSettings';
+import { TableSettingsOldProvider } from '@@/datatables/useOldTableSettings';
 
 import { ContainersDatatable } from './ContainersDatatable';
 import { TableSettings } from './types';
@@ -45,13 +45,16 @@ export function ListView() {
         reload
         title="Container list"
       />
-      <TableSettingsProvider defaults={defaultSettings} storageKey={tableKey}>
+      <TableSettingsOldProvider
+        defaults={defaultSettings}
+        storageKey={tableKey}
+      >
         <ContainersDatatable
           tableKey={tableKey}
           dataset={groupsQuery.containerGroups}
           onRemoveClick={handleRemove}
         />
-      </TableSettingsProvider>
+      </TableSettingsOldProvider>
     </>
   );
 }

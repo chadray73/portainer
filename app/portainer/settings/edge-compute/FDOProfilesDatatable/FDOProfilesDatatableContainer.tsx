@@ -1,4 +1,4 @@
-import { TableSettingsProvider } from '@@/datatables/useTableSettings';
+import { TableSettingsOldProvider } from '@@/datatables/useOldTableSettings';
 
 import {
   FDOProfilesDatatable,
@@ -14,9 +14,12 @@ export function FDOProfilesDatatableContainer({
   };
 
   return (
-    <TableSettingsProvider defaults={defaultSettings} storageKey="fdoProfiles">
+    <TableSettingsOldProvider
+      defaults={defaultSettings}
+      storageKey="fdoProfiles"
+    >
       {/* eslint-disable-next-line react/jsx-props-no-spreading */}
       <FDOProfilesDatatable {...props} />
-    </TableSettingsProvider>
+    </TableSettingsOldProvider>
   );
 }

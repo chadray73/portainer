@@ -1,11 +1,11 @@
 import { TableSettingsMenuAutoRefresh } from '@@/datatables/TableSettingsMenuAutoRefresh';
-import { useTableSettings } from '@@/datatables/useTableSettings';
+import { useOldTableSettings } from '@@/datatables/useOldTableSettings';
 
 import { EdgeDeviceTableSettings } from './types';
 
 export function EdgeDevicesDatatableSettings() {
   const { settings, setTableSettings } =
-    useTableSettings<EdgeDeviceTableSettings>();
+    useOldTableSettings<EdgeDeviceTableSettings>();
 
   return (
     <TableSettingsMenuAutoRefresh

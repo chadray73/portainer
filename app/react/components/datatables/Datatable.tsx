@@ -19,7 +19,7 @@ import { Table } from './Table';
 import { multiple } from './filter-types';
 import { SearchBar, useSearchBarState } from './SearchBar';
 import { SelectedRowsCount } from './SelectedRowsCount';
-import { TableSettingsProvider } from './useZustandTableSettings';
+import { TableSettingsProvider } from './useTableSettings';
 import { useRowSelect } from './useRowSelect';
 import { PaginationTableSettings, SortableTableSettings } from './types';
 

@@ -5,7 +5,7 @@ import { useSref } from '@uirouter/react';
 import type { DockerContainer } from '@/react/docker/containers/types';
 import { isOfflineEndpoint } from '@/portainer/helpers/endpointHelper';
 
-import { useTableSettings } from '@@/datatables/useZustandTableSettings';
+import { useTableSettings } from '@@/datatables/useTableSettings';
 
 import { TableSettings } from '../types';
 import { useRowContext } from '../RowContext';

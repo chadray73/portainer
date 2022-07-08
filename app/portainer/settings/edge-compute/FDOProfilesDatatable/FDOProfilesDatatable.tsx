@@ -8,7 +8,7 @@ import PortainerError from '@/portainer/error';
 import { PaginationControls } from '@@/PaginationControls';
 import { SelectedRowsCount } from '@@/datatables/SelectedRowsCount';
 import { TableFooter } from '@@/datatables/TableFooter';
-import { useTableSettings } from '@@/datatables/useTableSettings';
+import { useOldTableSettings } from '@@/datatables/useOldTableSettings';
 import { useRowSelect } from '@@/datatables/useRowSelect';
 import {
   Table,
@@ -37,7 +37,7 @@ export function FDOProfilesDatatable({
   isFDOEnabled,
 }: FDOProfilesDatatableProps) {
   const { settings, setTableSettings } =
-    useTableSettings<FDOProfilesTableSettings>();
+    useOldTableSettings<FDOProfilesTableSettings>();
   const columns = useColumns();
 
   const { isLoading, profiles, error } = useFDOProfiles();

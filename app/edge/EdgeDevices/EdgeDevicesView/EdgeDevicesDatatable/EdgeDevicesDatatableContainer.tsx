@@ -6,9 +6,9 @@ import { useDebounce } from '@/portainer/hooks/useDebounce';
 
 import { useSearchBarState } from '@@/datatables/SearchBar';
 import {
-  TableSettingsProvider,
-  useTableSettings,
-} from '@@/datatables/useTableSettings';
+  TableSettingsOldProvider,
+  useOldTableSettings,
+} from '@@/datatables/useOldTableSettings';
 
 import {
   EdgeDevicesDatatable,
@@ -38,7 +38,10 @@ export function EdgeDevicesDatatableContainer({
   const storageKey = 'edgeDevices';
 
   return (
-    <TableSettingsProvider defaults={defaultSettings} storageKey={storageKey}>
+    <TableSettingsOldProvider
+      defaults={defaultSettings}
+      storageKey={storageKey}
+    >
       <Loader storageKey={storageKey}>
         {({
           environments,
@@ -61,7 +64,7 @@ export function EdgeDevicesDatatableContainer({
           />
         )}
       </Loader>
-    </TableSettingsProvider>
+    </TableSettingsOldProvider>
   );
 }
 
@@ -78,7 +81,7 @@ interface LoaderProps {
 }
 
 function Loader({ children, storageKey }: LoaderProps) {
-  const { settings } = useTableSettings<EdgeDeviceTableSettings>();
+  const { settings } = useOldTableSettings<EdgeDeviceTableSettings>();
   const [pagination, setPagination] = useState({
     pageLimit: settings.pageSize,
     page: 1,

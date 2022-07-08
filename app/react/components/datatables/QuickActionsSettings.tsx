@@ -5,7 +5,7 @@ import {
 
 import { Checkbox } from '@@/form-components/Checkbox';
 
-import { useTableSettings } from './useZustandTableSettings';
+import { useTableSettings } from './useTableSettings';
 
 export interface Action {
   id: QuickAction;

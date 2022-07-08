@@ -18,7 +18,7 @@ import {
   TableTitleActions,
 } from '@@/datatables';
 import { multiple } from '@@/datatables/filter-types';
-import { useTableSettings } from '@@/datatables/useTableSettings';
+import { useOldTableSettings } from '@@/datatables/useOldTableSettings';
 import { ColumnVisibilityMenu } from '@@/datatables/ColumnVisibilityMenu';
 import { SearchBar } from '@@/datatables/SearchBar';
 import { useRowSelect } from '@@/datatables/useRowSelect';
@@ -64,7 +64,7 @@ export function EdgeDevicesDatatable({
   totalCount,
 }: EdgeDevicesTableProps) {
   const { settings, setTableSettings } =
-    useTableSettings<EdgeDeviceTableSettings>();
+    useOldTableSettings<EdgeDeviceTableSettings>();
 
   const columns = useColumns();
 
