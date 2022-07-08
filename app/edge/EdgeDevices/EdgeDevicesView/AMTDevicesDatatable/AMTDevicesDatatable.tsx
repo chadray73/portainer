@@ -6,7 +6,7 @@ import { RowProvider } from '@/edge/EdgeDevices/EdgeDevicesView/AMTDevicesDatata
 import { EnvironmentId } from '@/portainer/environments/types';
 import PortainerError from '@/portainer/error';
 
-import { InnerDatatable } from '@@/datatables/InnerDatatable';
+import { NestedTable } from '@@/datatables/NestedTable';
 import { Table, TableContainer, TableHeaderRow, TableRow } from '@@/datatables';
 
 import { useColumns } from './columns';
@@ -33,7 +33,7 @@ export function AMTDevicesDatatable({ environmentId }: AMTDevicesTableProps) {
   const tbodyProps = getTableBodyProps();
 
   return (
-    <InnerDatatable>
+    <NestedTable>
       <TableContainer>
         <Table
           className={tableProps.className}
@@ -87,7 +87,7 @@ export function AMTDevicesDatatable({ environmentId }: AMTDevicesTableProps) {
           </tbody>
         </Table>
       </TableContainer>
-    </InnerDatatable>
+    </NestedTable>
   );
 }
 
