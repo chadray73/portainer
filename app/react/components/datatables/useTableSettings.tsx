@@ -1,12 +1,8 @@
-import { Context, createContext, ReactNode, useContext, useMemo } from 'react';
+import { Context, createContext, ReactNode, useContext } from 'react';
 
-interface TableSettingsContextInterface<T> {
-  settings: T;
-}
-
-const TableSettingsContext = createContext<TableSettingsContextInterface<
-  Record<string, unknown>
-> | null>(null);
+const TableSettingsContext = createContext<Record<string, unknown> | null>(
+  null
+);
 
 export function useTableSettings<T>() {
   const Context = getContextType<T>();
@@ -31,18 +27,9 @@ export function TableSettingsProvider<T>({
 }: ProviderProps<T>) {
   const Context = getContextType<T>();
 
-  const contextValue = useMemo(
-    () => ({
-      settings,
-    }),
-    [settings]
-  );
-
-  return <Context.Provider value={contextValue}>{children}</Context.Provider>;
+  return <Context.Provider value={settings}>{children}</Context.Provider>;
 }
 
 function getContextType<T>() {
-  return TableSettingsContext as unknown as Context<
-    TableSettingsContextInterface<T>
-  >;
+  return TableSettingsContext as unknown as Context<T>;
 }

@@ -28,7 +28,7 @@ function QuickActionsCell({
 
   const offlineMode = isOfflineEndpoint(environment);
 
-  const { settings } = useTableSettings<TableSettings>();
+  const settings = useTableSettings<TableSettings>();
 
   const { hiddenQuickActions = [] } = settings;
 

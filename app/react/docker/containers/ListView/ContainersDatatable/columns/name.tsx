@@ -33,7 +33,7 @@ export function NameCell({
     nodeName: container.NodeName,
   });
 
-  const { settings } = useTableSettings<TableSettings>();
+  const settings = useTableSettings<TableSettings>();
   const truncate = settings.truncateContainerName;
 
   const { environment } = useRowContext();
