@@ -9,19 +9,10 @@ import { useContainerGroups } from '@/react/azure/queries/useContainerGroups';
 import { useSubscriptions } from '@/react/azure/queries/useSubscriptions';
 
 import { PageHeader } from '@@/PageHeader';
-import { TableSettingsOldProvider } from '@@/datatables/useOldTableSettings';
 
 import { ContainersDatatable } from './ContainersDatatable';
-import { TableSettings } from './types';
 
 export function ListView() {
-  const defaultSettings: TableSettings = {
-    pageSize: 10,
-    sortBy: { id: 'state', desc: false },
-  };
-
-  const tableKey = 'containergroups';
-
   const environmentId = useEnvironmentId();
 
   const subscriptionsQuery = useSubscriptions(environmentId);
@@ -45,16 +36,11 @@ export function ListView() {
         reload
         title="Container list"
       />
-      <TableSettingsOldProvider
-        defaults={defaultSettings}
-        storageKey={tableKey}
-      >
-        <ContainersDatatable
-          tableKey={tableKey}
-          dataset={groupsQuery.containerGroups}
-          onRemoveClick={handleRemove}
-        />
-      </TableSettingsOldProvider>
+
+      <ContainersDatatable
+        dataset={groupsQuery.containerGroups}
+        onRemoveClick={handleRemove}
+      />
     </>
   );
 }

@@ -9,7 +9,7 @@ import {
   TableInstance,
   TableState,
 } from 'react-table';
-import { ReactNode } from 'react';
+import { ComponentType, ReactNode } from 'react';
 import { useRowSelectColumn } from '@lineup-lite/hooks';
 
 import { PaginationControls } from '@@/PaginationControls';

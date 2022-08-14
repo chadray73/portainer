@@ -1,7 +1,7 @@
 import {
   PaginationTableSettings,
   SortableTableSettings,
-} from '@@/datatables/types-old';
+} from '@@/datatables/types';
 
 export interface TableSettings
   extends PaginationTableSettings,
