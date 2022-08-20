@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useIsMutating } from 'react-query';
 
 import { useSettings } from '@/portainer/settings/queries';
 import { useGroups } from '@/portainer/environment-groups/queries';
-import { r2a } from '@/react-tools/react2angular';
+import { activateDeviceMutationKey } from '@/portainer/hostmanagement/open-amt/queries';
 
 import { PageHeader } from '@@/PageHeader';
 import { ViewLoading } from '@@/ViewLoading';
@@ -10,8 +10,7 @@ import { ViewLoading } from '@@/ViewLoading';
 import { EdgeDevicesDatatableContainer } from './EdgeDevicesDatatable/EdgeDevicesDatatableContainer';
 
 export function EdgeDevicesView() {
-  const [loadingMessage, setLoadingMessage] = useState('');
-
+  const isActivatingDevice = useIsActivatingDevice();
   const settingsQuery = useSettings();
   const groupsQuery = useGroups();
 
@@ -29,11 +28,10 @@ export function EdgeDevicesView() {
         breadcrumbs={[{ label: 'EdgeDevices' }]}
       />
 
-      {loadingMessage ? (
-        <ViewLoading message={loadingMessage} />
+      {isActivatingDevice ? (
+        <ViewLoading message="Activating Active Management Technology on selected device..." />
       ) : (
         <EdgeDevicesDatatableContainer
-          setLoadingMessage={setLoadingMessage}
           isFdoEnabled={
             settings.EnableEdgeComputeFeatures &&
             settings.fdoConfiguration.enabled
@@ -56,4 +54,7 @@ export function EdgeDevicesView() {
   );
 }
 
-export const EdgeDevicesViewAngular = r2a(EdgeDevicesView, []);
+function useIsActivatingDevice() {
+  const count = useIsMutating({ mutationKey: activateDeviceMutationKey });
+  return count > 0;
+}

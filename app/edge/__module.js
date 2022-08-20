@@ -1,15 +1,16 @@
 import angular from 'angular';
 
+import { r2a } from '@/react-tools/react2angular';
 import edgeStackModule from './views/edge-stacks';
 import { componentsModule } from './components';
 import { WaitingRoomViewAngular } from './EdgeDevices/WaitingRoomView';
 import { reactModule } from './react';
-import { EdgeDevicesViewAngular } from './EdgeDevices/EdgeDevicesView';
+import { EdgeDevicesView } from './EdgeDevices/EdgeDevicesView';
 
 angular
   .module('portainer.edge', [edgeStackModule, componentsModule, reactModule])
   .component('waitingRoomView', WaitingRoomViewAngular)
-  .component('edgeDevicesView', EdgeDevicesViewAngular)
+  .component('edgeDevicesView', r2a(EdgeDevicesView, []))
   .config(function config($stateRegistryProvider) {
     const edge = {
       name: 'edge',

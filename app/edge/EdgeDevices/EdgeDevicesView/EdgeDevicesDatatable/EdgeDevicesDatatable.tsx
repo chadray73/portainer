@@ -41,7 +41,6 @@ export interface EdgeDevicesTableProps {
   mpsServer: string;
   dataset: Environment[];
   groups: EnvironmentGroup[];
-  setLoadingMessage(message: string): void;
   pagination: Pagination;
   onChangePagination(pagination: Partial<Pagination>): void;
   totalCount: number;
@@ -58,7 +57,6 @@ export function EdgeDevicesDatatable({
   onChangeSearch,
   search,
   groups,
-  setLoadingMessage,
   pagination,
   onChangePagination,
   totalCount,
@@ -130,7 +128,6 @@ export function EdgeDevicesDatatable({
                 selectedItems={selectedFlatRows.map((row) => row.original)}
                 isFDOEnabled={isFdoEnabled}
                 isOpenAMTEnabled={isOpenAmtEnabled}
-                setLoadingMessage={setLoadingMessage}
                 showWaitingRoomLink={showWaitingRoomLink}
               />
             </TableActions>
