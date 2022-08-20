@@ -7,7 +7,7 @@ import { activateDeviceMutationKey } from '@/portainer/hostmanagement/open-amt/q
 import { PageHeader } from '@@/PageHeader';
 import { ViewLoading } from '@@/ViewLoading';
 
-import { EdgeDevicesDatatableContainer } from './EdgeDevicesDatatable/EdgeDevicesDatatableContainer';
+import { EdgeDevicesDatatable } from './EdgeDevicesDatatable/EdgeDevicesDatatable';
 
 export function EdgeDevicesView() {
   const isActivatingDevice = useIsActivatingDevice();
@@ -31,7 +31,7 @@ export function EdgeDevicesView() {
       {isActivatingDevice ? (
         <ViewLoading message="Activating Active Management Technology on selected device..." />
       ) : (
-        <EdgeDevicesDatatableContainer
+        <EdgeDevicesDatatable
           isFdoEnabled={
             settings.EnableEdgeComputeFeatures &&
             settings.fdoConfiguration.enabled

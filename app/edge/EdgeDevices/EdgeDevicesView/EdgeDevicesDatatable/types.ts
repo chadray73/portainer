@@ -3,14 +3,14 @@ import {
   RefreshableTableSettings,
   SettableColumnsTableSettings,
   SortableTableSettings,
-} from '@@/datatables/types-old';
+} from '@@/datatables/types';
 
 export interface Pagination {
   pageLimit: number;
   page: number;
 }
 
-export interface EdgeDeviceTableSettings
+export interface TableSettings
   extends SortableTableSettings,
     PaginationTableSettings,
     SettableColumnsTableSettings,
