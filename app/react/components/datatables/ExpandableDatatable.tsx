@@ -14,6 +14,7 @@ import { Fragment, ReactNode } from 'react';
 import { useRowSelectColumn } from '@lineup-lite/hooks';
 
 import { PaginationControls } from '@@/PaginationControls';
+import { IconProps } from '@@/Icon';
 
 import { PaginationTableSettings, SortableTableSettings } from './types';
 import { Table } from './Table';
@@ -29,7 +30,8 @@ interface DefaultTableSettings
 
 interface TitleOptionsVisible {
   title: string;
-  icon?: string;
+  icon?: IconProps['icon'];
+  featherIcon?: IconProps['featherIcon'];
   hide?: never;
 }
 
