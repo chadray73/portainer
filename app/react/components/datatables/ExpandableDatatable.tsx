@@ -9,6 +9,7 @@ import {
   TableState,
   useExpanded,
   Row,
+  ActionType,
 } from 'react-table';
 import { Fragment, ReactNode } from 'react';
 import { useRowSelectColumn } from '@lineup-lite/hooks';
@@ -56,6 +57,8 @@ interface Props<
   isLoading?: boolean;
   totalCount?: number;
   renderSubRow(row: Row<D>): ReactNode;
+  stateReducer?(newState: TableState<D>, action: ActionType): TableState<D>;
+  pageCount?: number;
 }
 
 export function ExpandableDatatable<
@@ -77,6 +80,8 @@ export function ExpandableDatatable<
   initialTableState = {},
   isLoading,
   totalCount = dataset.length,
+  stateReducer = (state) => state,
+  pageCount,
 }: Props<D, TSettings>) {
   const [searchBarValue, setSearchBarValue] = useSearchBarState(storageKey);
 
@@ -94,6 +99,8 @@ export function ExpandableDatatable<
         ...initialTableState,
       },
       isRowSelectable,
+      manualPagination: typeof pageCount !== 'undefined',
+      pageCount,
       autoResetExpanded: false,
       autoResetSelectedRows: false,
       getRowId,
@@ -111,7 +118,7 @@ export function ExpandableDatatable<
           default:
             break;
         }
-        return newState;
+        return stateReducer(newState, action);
       },
     },
     useFilters,
@@ -133,7 +140,7 @@ export function ExpandableDatatable<
     gotoPage,
     setPageSize,
     setGlobalFilter,
-    state: { pageIndex, pageSize },
+    state: { pageIndex, pageSize, globalFilter },
   } = tableInstance;
 
   const tableProps = getTableProps();
@@ -148,7 +155,10 @@ export function ExpandableDatatable<
           <Table.Container>
             {isTitleVisible(titleOptions) && (
               <Table.Title label={titleOptions.title} icon={titleOptions.icon}>
-                <SearchBar value={searchBarValue} onChange={setGlobalFilter} />
+                <SearchBar
+                  value={globalFilter || ''}
+                  onChange={setGlobalFilter}
+                />
                 {renderTableActions && (
                   <Table.Actions>
                     {renderTableActions(selectedItems)}

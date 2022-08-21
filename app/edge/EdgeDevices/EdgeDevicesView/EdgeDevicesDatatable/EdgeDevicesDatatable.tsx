@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { Box } from 'react-feather';
+import { useState } from 'react';
 
 import { EdgeTypes, Environment } from '@/portainer/environments/types';
 import { EnvironmentGroup } from '@/portainer/environment-groups/types';
@@ -10,6 +11,7 @@ import { TableSettingsMenu } from '@@/datatables';
 import { ColumnVisibilityMenu } from '@@/datatables/ColumnVisibilityMenu';
 import { InformationPanel } from '@@/InformationPanel';
 import { TextTip } from '@@/Tip/TextTip';
+import { useSearchBarState } from '@@/datatables/SearchBar';
 
 import { AMTDevicesDatatable } from '../AMTDevicesDatatable/AMTDevicesDatatable';
 
@@ -39,13 +41,9 @@ export function EdgeDevicesDatatable({
   mpsServer,
   groups,
 }: EdgeDevicesTableProps) {
-  // const [pagination, setPagination] = useState({
-  //   pageLimit: settings.pageSize,
-  //   page: 1,
-  // });
+  const [page, setPage] = useState(0);
 
-  // const [search, setSearch] = useSearchBarState(storageKey);
-  // const debouncedSearchValue = useDebounce(search);
+  const [search, setSearch] = useSearchBarState(storageKey);
 
   const settings = useStore();
   const hidableColumns = _.compact(
@@ -54,9 +52,10 @@ export function EdgeDevicesDatatable({
   const { environments, isLoading, totalCount } = useEnvironmentList(
     {
       edgeDevice: true,
-      search: '',
+      search,
       types: EdgeTypes,
-      // ...pagination,
+      page,
+      pageLimit: settings.pageSize,
     },
     settings.autoRefreshRate * 1000
   );
@@ -89,6 +88,26 @@ export function EdgeDevicesDatatable({
       )}
       <RowProvider context={{ isOpenAmtEnabled, groups }}>
         <ExpandableDatatable
+          stateReducer={(newState, action) => {
+            switch (action.type) {
+              case 'setGlobalFilter':
+                setSearch(action.filterValue);
+                break;
+              case 'toggleSortBy':
+                settings.setSortBy(action.columnId, action.desc);
+                break;
+              case 'setPageSize':
+                settings.setPageSize(action.pageSize);
+                break;
+              case 'gotoPage':
+                setPage(action.pageIndex);
+                break;
+              default:
+                break;
+            }
+
+            return newState;
+          }}
           dataset={environments}
           columns={columns}
           isLoading={isLoading}
@@ -107,6 +126,8 @@ export function EdgeDevicesDatatable({
               </td>
             </tr>
           )}
+          initialTableState={{ pageIndex: page }}
+          pageCount={totalCount / settings.pageSize}
           renderTableActions={(selectedRows) => (
             <EdgeDevicesDatatableActions
               selectedItems={selectedRows}
@@ -139,113 +160,4 @@ export function EdgeDevicesDatatable({
       </RowProvider>
     </>
   );
-
-  // const { settings, setTableSettings } =
-  //   useOldTableSettings<EdgeDeviceTableSettings>();
-
-  // const {
-  //   getTableProps,
-  //   getTableBodyProps,
-  //   headerGroups,
-  //   rows,
-  //   prepareRow,
-  //   selectedFlatRows,
-  //   allColumns,
-  //   setHiddenColumns,
-  // } = useTable<Environment>(
-  //   {
-  //     defaultCanFilter: false,
-  //     columns,
-  //     data: dataset,
-  //     filterTypes: { multiple },
-  //     initialState: {
-  //       hiddenColumns: settings.hiddenColumns,
-  //       sortBy: [settings.sortBy],
-  //     },
-  //     isRowSelectable() {
-  //       return true;
-  //     },
-  //     autoResetExpanded: false,
-  //     autoResetSelectedRows: false,
-  //     getRowId(originalRow: Environment) {
-  //       return originalRow.Id.toString();
-  //     },
-  //     selectColumnWidth: 5,
-  //   },
-  //   useFilters,
-  //   useSortBy,
-  //   useExpanded,
-  //   useRowSelect,
-  //   useRowSelectColumn
-  // );
-
-  // const columnsToHide = allColumns.filter((colInstance) => {
-  //   const columnDef = columns.find((c) => c.id === colInstance.id);
-  //   return columnDef?.canHide;
-  // });
-
-  // const tableProps = getTableProps();
-  // const tbodyProps = getTableBodyProps();
-
-  // const groupsById = _.groupBy(groups, 'Id');
-
-  // return (
-  //   <div className="row">
-  //     <div className="col-sm-12">
-  //       <TableContainer>
-  //         <TableTitle icon="box" featherIcon label="Edge&nbsp;Devices">
-  //           <SearchBar value={search} onChange={handleSearchBarChange} />
-  //           <TableActions>
-
-  //           </TableActions>
-  //           <TableTitleActions>
-
-  //           </TableTitleActions>
-  //         </TableTitle>
-  //         {isOpenAmtEnabled && someDeviceHasAMTActivated && (
-  //           <div className={styles.kvmTip}>
-  //             <TextTip color="blue">
-  //               For the KVM function to work you need to have the MPS server
-  //               added to your trusted site list, browse to this{' '}
-  //               <a
-  //                 href={`https://${mpsServer}`}
-  //                 target="_blank"
-  //                 rel="noreferrer"
-  //                 className="space-right"
-  //               >
-  //                 site
-  //               </a>
-  //               and add to your trusted site list
-  //             </TextTip>
-  //           </div>
-  //         )}
-
-  // function gotoPage(pageIndex: number) {
-  //   onChangePagination({ page: pageIndex });
-  // }
-
-  // function setPageSize(pageSize: number) {
-  //   onChangePagination({ pageLimit: pageSize });
-  // }
-
-  // function handlePageSizeChange(pageSize: number) {
-  //   setPageSize(pageSize);
-  //   setTableSettings((settings) => ({ ...settings, pageSize }));
-  // }
-
-  // function handleChangeColumnsVisibility(hiddenColumns: string[]) {
-  //   setHiddenColumns(hiddenColumns);
-  //   setTableSettings((settings) => ({ ...settings, hiddenColumns }));
-  // }
-
-  // function handleSearchBarChange(value: string) {
-  //   onChangeSearch(value);
-  // }
-
-  // function handleSortChange(id: string, desc: boolean) {
-  //   setTableSettings((settings) => ({
-  //     ...settings,
-  //     sortBy: { id, desc },
-  //   }));
-  // }
 }
