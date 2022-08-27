@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { useStore } from 'zustand';
 import { Box } from 'react-feather';
 import { useState } from 'react';
 
@@ -32,7 +33,7 @@ export interface EdgeDevicesTableProps {
 }
 const storageKey = 'edgeDevices';
 
-const useStore = createStore(storageKey);
+const settingsStore = createStore(storageKey);
 
 export function EdgeDevicesDatatable({
   isFdoEnabled,
@@ -41,11 +42,11 @@ export function EdgeDevicesDatatable({
   mpsServer,
   groups,
 }: EdgeDevicesTableProps) {
+  const settings = useStore(settingsStore);
   const [page, setPage] = useState(1);
 
   const [search, setSearch] = useSearchBarState(storageKey);
 
-  const settings = useStore();
   const hidableColumns = _.compact(
     columns.filter((col) => col.canHide).map((col) => col.id)
   );
@@ -118,7 +119,7 @@ export function EdgeDevicesDatatable({
             title: 'Edge Devices',
             icon: Box,
           }}
-          settingsStore={settings}
+          settingsStore={settingsStore}
           storageKey={storageKey}
           renderSubRow={(row) => (
             <tr>
