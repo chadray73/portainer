@@ -41,7 +41,7 @@ export function EdgeDevicesDatatable({
   mpsServer,
   groups,
 }: EdgeDevicesTableProps) {
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
 
   const [search, setSearch] = useSearchBarState(storageKey);
 
@@ -127,7 +127,7 @@ export function EdgeDevicesDatatable({
             </tr>
           )}
           initialTableState={{ pageIndex: page }}
-          pageCount={totalCount / settings.pageSize}
+          pageCount={Math.ceil(totalCount / settings.pageSize)}
           renderTableActions={(selectedRows) => (
             <EdgeDevicesDatatableActions
               selectedItems={selectedRows}
