@@ -56,6 +56,8 @@ export function EdgeDevicesDatatable({
       types: EdgeTypes,
       page,
       pageLimit: settings.pageSize,
+      sort: settings.sortBy.id,
+      order: settings.sortBy.desc ? 'desc' : 'asc',
     },
     settings.autoRefreshRate * 1000
   );
