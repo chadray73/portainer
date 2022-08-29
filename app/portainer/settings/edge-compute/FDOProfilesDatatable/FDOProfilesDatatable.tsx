@@ -9,7 +9,7 @@ import { useFDOProfiles } from './useFDOProfiles';
 
 const storageKey = 'fdoProfiles';
 
-const useStore = createStoreHook(storageKey);
+const settingsStore = createStoreHook(storageKey);
 
 export interface FDOProfilesDatatableProps {
   isFDOEnabled: boolean;
@@ -19,14 +19,13 @@ export function FDOProfilesDatatable({
   isFDOEnabled,
 }: FDOProfilesDatatableProps) {
   const columns = useColumns();
-  const store = useStore();
   const { isLoading, profiles } = useFDOProfiles();
 
   return (
     <Datatable
       columns={columns}
       dataset={profiles}
-      settingsStore={store}
+      settingsStore={settingsStore}
       storageKey={storageKey}
       titleOptions={{ title: 'Device Profiles', icon: List }}
       disableSelect={!isFDOEnabled}

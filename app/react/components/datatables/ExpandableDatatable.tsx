@@ -13,7 +13,7 @@ import {
 } from 'react-table';
 import { Fragment, ReactNode } from 'react';
 import { useRowSelectColumn } from '@lineup-lite/hooks';
-import { useStore, Write } from 'zustand';
+import { StoreApi, useStore } from 'zustand';
 
 import { PaginationControls } from '@@/PaginationControls';
 import { IconProps } from '@@/Icon';
@@ -48,10 +48,7 @@ interface Props<
   columns: readonly Column<D>[];
   renderTableSettings?(instance: TableInstance<D>): ReactNode;
   renderTableActions?(selectedRows: D[]): ReactNode;
-  settingsStore: Write<
-    StoreApi<TSettings>,
-    StorePersist<TSettings, Partial<TSettings>>
-  >;
+  settingsStore: StoreApi<TSettings>;
   disableSelect?: boolean;
   getRowId?(row: D): string;
   isRowSelectable?(row: D): boolean;
@@ -109,6 +106,7 @@ export function ExpandableDatatable<
       autoResetExpanded: false,
       autoResetSelectedRows: false,
       getRowId,
+      // todo move to callbacks
       stateReducer: (newState, action) => {
         switch (action.type) {
           case 'setGlobalFilter':

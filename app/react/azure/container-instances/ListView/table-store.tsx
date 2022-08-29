@@ -1,4 +1,4 @@
-import create from 'zustand';
+import { createStore } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 import { keyBuilder } from '@/portainer/hooks/useLocalStorage';
@@ -12,7 +12,7 @@ import { TableSettings } from './types';
  */
 
 export function createStoreHook(storageKey: string) {
-  return create<TableSettings>()(
+  return createStore<TableSettings>()(
     persist(
       (set) => ({
         ...sortableSettings(set, 'state'),

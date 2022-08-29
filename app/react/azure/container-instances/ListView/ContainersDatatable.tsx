@@ -13,21 +13,19 @@ import { createStoreHook } from './table-store';
 
 const tableKey = 'containergroups';
 
-const useStore = createStoreHook(tableKey);
+const settingsStore = createStoreHook(tableKey);
 export interface Props {
   dataset: ContainerGroup[];
   onRemoveClick(containerIds: string[]): void;
 }
 
 export function ContainersDatatable({ dataset, onRemoveClick }: Props) {
-  const store = useStore();
-
   return (
     <Datatable
       dataset={dataset}
       columns={columns}
       storageKey={tableKey}
-      settingsStore={store}
+      settingsStore={settingsStore}
       titleOptions={{
         title: 'Containers',
         icon: Box,

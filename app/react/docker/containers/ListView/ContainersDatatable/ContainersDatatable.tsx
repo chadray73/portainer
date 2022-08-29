@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { useStore } from 'zustand';
 
 import { Environment } from '@/portainer/environments/types';
 import type { DockerContainer } from '@/react/docker/containers/types';
@@ -20,7 +21,7 @@ import { ContainersDatatableActions } from './ContainersDatatableActions';
 import { RowProvider } from './RowContext';
 
 const storageKey = 'containers';
-const useStore = createStore(storageKey);
+const settingsStore = createStore(storageKey);
 
 const actions = [
   buildAction('logs', 'Logs'),
@@ -39,7 +40,7 @@ export function ContainersDatatable({
   isHostColumnVisible,
   environment,
 }: Props) {
-  const settings = useStore();
+  const settings = useStore(settingsStore);
   const isGPUsColumnVisible = useShowGPUsColumn(environment.Id);
   const columns = useColumns(isHostColumnVisible, isGPUsColumnVisible);
   const hidableColumns = _.compact(
@@ -60,7 +61,7 @@ export function ContainersDatatable({
           icon: 'fa-cubes',
           title: 'Containers',
         }}
-        settingsStore={settings}
+        settingsStore={settingsStore}
         columns={columns}
         renderTableActions={(selectedRows) => (
           <ContainersDatatableActions

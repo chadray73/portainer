@@ -5,6 +5,7 @@ import {
   Column,
   TableState,
 } from 'react-table';
+import { StoreApi, useStore } from 'zustand';
 
 import { PaginationTableSettings, SortableTableSettings } from './types';
 import { Table } from './Table';
@@ -18,7 +19,7 @@ interface DefaultTableSettings
 
 interface Props<
   D extends Record<string, unknown>,
-  TSettings extends DefaultTableSettings
+  TSettings extends StoreApi<DefaultTableSettings>
 > {
   dataset: D[];
   columns: readonly Column<D>[];
@@ -32,7 +33,7 @@ interface Props<
 
 export function NestedDatatable<
   D extends Record<string, unknown>,
-  TSettings extends DefaultTableSettings
+  TSettings extends StoreApi<DefaultTableSettings>
 >({
   columns,
   dataset,
@@ -42,6 +43,8 @@ export function NestedDatatable<
   initialTableState = {},
   isLoading,
 }: Props<D, TSettings>) {
+  const settings = useStore(settingsStore);
+
   const tableInstance = useTable<D>(
     {
       defaultCanFilter: false,
@@ -49,15 +52,16 @@ export function NestedDatatable<
       data: dataset,
       filterTypes: { multiple },
       initialState: {
-        sortBy: [settingsStore.sortBy],
+        sortBy: [settings.sortBy],
         ...initialTableState,
       },
       autoResetSelectedRows: false,
       getRowId,
+      // todo, move to callbacks
       stateReducer: (newState, action) => {
         switch (action.type) {
           case 'toggleSortBy':
-            settingsStore.setSortBy(action.columnId, action.desc);
+            settings.setSortBy(action.columnId, action.desc);
             break;
 
           default:

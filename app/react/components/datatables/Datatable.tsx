@@ -11,6 +11,7 @@ import {
 } from 'react-table';
 import { ComponentType, ReactNode } from 'react';
 import { useRowSelectColumn } from '@lineup-lite/hooks';
+import { StoreApi, useStore } from 'zustand';
 
 import { PaginationControls } from '@@/PaginationControls';
 import { IconProps } from '@@/Icon';
@@ -45,7 +46,7 @@ interface Props<
   columns: readonly Column<D>[];
   renderTableSettings?(instance: TableInstance<D>): ReactNode;
   renderTableActions?(selectedRows: D[]): ReactNode;
-  settingsStore: TSettings;
+  settingsStore: StoreApi<TSettings>;
   disableSelect?: boolean;
   getRowId?(row: D): string;
   isRowSelectable?(row: Row<D>): boolean;
@@ -77,6 +78,8 @@ export function Datatable<
 }: Props<D, TSettings>) {
   const [searchBarValue, setSearchBarValue] = useSearchBarState(storageKey);
 
+  const settings = useStore(settingsStore);
+
   const tableInstance = useTable<D>(
     {
       defaultCanFilter: false,
@@ -84,8 +87,8 @@ export function Datatable<
       data: dataset,
       filterTypes: { multiple },
       initialState: {
-        pageSize: settingsStore.pageSize || 10,
-        sortBy: [settingsStore.sortBy],
+        pageSize: settings.pageSize || 10,
+        sortBy: [settings.sortBy],
         globalFilter: searchBarValue,
         ...initialTableState,
       },
@@ -98,10 +101,10 @@ export function Datatable<
             setSearchBarValue(action.filterValue);
             break;
           case 'toggleSortBy':
-            settingsStore.setSortBy(action.columnId, action.desc);
+            settings.setSortBy(action.columnId, action.desc);
             break;
           case 'setPageSize':
-            settingsStore.setPageSize(action.pageSize);
+            settings.setPageSize(action.pageSize);
             break;
           default:
             break;

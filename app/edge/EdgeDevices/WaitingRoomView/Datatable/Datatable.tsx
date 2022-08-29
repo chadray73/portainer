@@ -9,11 +9,10 @@ import { useAssociateDeviceMutation, useLicenseOverused } from '../queries';
 
 import { columns } from './columns';
 import { createStore } from './store';
-import { TableSettings } from './types';
 
 const storageKey = 'edge-devices-waiting-room';
 
-const useStore = createStore(storageKey);
+const settingsStore = createStore(storageKey);
 
 interface Props {
   devices: Environment[];
@@ -25,15 +24,13 @@ export function Datatable({ devices, isLoading, totalCount }: Props) {
   const associateMutation = useAssociateDeviceMutation();
   const licenseOverused = useLicenseOverused();
 
-  const settings = useStore();
-
   return (
-    <GenericDatatable<Environment, TableSettings>
+    <GenericDatatable
       columns={columns}
       dataset={devices}
       storageKey={storageKey}
       titleOptions={{ title: 'Edge Devices Waiting Room' }}
-      settingsStore={settings}
+      settingsStore={settingsStore}
       emptyContentLabel="No Edge Devices found"
       renderTableActions={(selectedRows) => (
         <>

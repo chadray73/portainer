@@ -11,11 +11,9 @@ export interface AMTDevicesTableProps {
   environmentId: EnvironmentId;
 }
 
-const useStore = createNestedDatatableStoreHook('hostname');
+const settingsStore = createNestedDatatableStoreHook('hostname');
 
 export function AMTDevicesDatatable({ environmentId }: AMTDevicesTableProps) {
-  const store = useStore();
-
   const devicesQuery = useAMTDevices(environmentId);
 
   return (
@@ -23,7 +21,7 @@ export function AMTDevicesDatatable({ environmentId }: AMTDevicesTableProps) {
       columns={columns}
       dataset={devicesQuery.devices}
       isLoading={devicesQuery.isLoading}
-      settingsStore={store}
+      settingsStore={settingsStore}
       emptyContentLabel={userMessage(devicesQuery.error)}
     />
   );

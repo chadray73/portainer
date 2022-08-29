@@ -1,4 +1,4 @@
-import create from 'zustand';
+import { createStore } from 'zustand';
 
 import {
   paginationSettings,
@@ -15,7 +15,7 @@ interface TableSettings
  * use for default nested table store
  */
 export function createNestedDatatableStoreHook(initialSortBy?: string) {
-  return create<TableSettings>()((set) => ({
+  return createStore<TableSettings>()((set) => ({
     ...sortableSettings(set, initialSortBy),
     ...paginationSettings(set),
   }));
