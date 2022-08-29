@@ -91,26 +91,6 @@ export function EdgeDevicesDatatable({
       )}
       <RowProvider context={{ isOpenAmtEnabled, groups }}>
         <ExpandableDatatable
-          stateReducer={(newState, action) => {
-            switch (action.type) {
-              case 'setGlobalFilter':
-                setSearch(action.filterValue);
-                break;
-              case 'toggleSortBy':
-                settings.setSortBy(action.columnId, action.desc);
-                break;
-              case 'setPageSize':
-                settings.setPageSize(action.pageSize);
-                break;
-              case 'gotoPage':
-                setPage(action.pageIndex);
-                break;
-              default:
-                break;
-            }
-
-            return newState;
-          }}
           dataset={environments}
           columns={columns}
           isLoading={isLoading}
@@ -159,6 +139,8 @@ export function EdgeDevicesDatatable({
               </>
             );
           }}
+          onPageChange={setPage}
+          onSearchChange={setSearch}
         />
       </RowProvider>
     </>

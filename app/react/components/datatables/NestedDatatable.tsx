@@ -57,18 +57,6 @@ export function NestedDatatable<
       },
       autoResetSelectedRows: false,
       getRowId,
-      // todo, move to callbacks
-      stateReducer: (newState, action) => {
-        switch (action.type) {
-          case 'toggleSortBy':
-            settings.setSortBy(action.columnId, action.desc);
-            break;
-
-          default:
-            break;
-        }
-        return newState;
-      },
     },
     useFilters,
     useSortBy
@@ -100,6 +88,7 @@ export function NestedDatatable<
                     role={role}
                     style={style}
                     headers={headerGroup.headers}
+                    onSortChange={handleSortChange}
                   />
                 );
               })}
@@ -130,6 +119,10 @@ export function NestedDatatable<
       </TableSettingsProvider>
     </NestedTable>
   );
+
+  function handleSortChange(colId: string, desc: boolean) {
+    settings.setSortBy(colId, desc);
+  }
 }
 
 function defaultGetRowId<D extends Record<string, unknown>>(row: D): string {

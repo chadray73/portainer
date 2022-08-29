@@ -95,22 +95,6 @@ export function Datatable<
       isRowSelectable,
       autoResetSelectedRows: false,
       getRowId,
-      stateReducer: (newState, action) => {
-        switch (action.type) {
-          case 'setGlobalFilter':
-            setSearchBarValue(action.filterValue);
-            break;
-          case 'toggleSortBy':
-            settings.setSortBy(action.columnId, action.desc);
-            break;
-          case 'setPageSize':
-            settings.setPageSize(action.pageSize);
-            break;
-          default:
-            break;
-        }
-        return newState;
-      },
     },
     useFilters,
     useGlobalFilter,
@@ -130,7 +114,7 @@ export function Datatable<
     gotoPage,
     setPageSize,
     setGlobalFilter,
-    state: { pageIndex, pageSize },
+    state,
   } = tableInstance;
 
   const tableProps = getTableProps();
@@ -145,7 +129,10 @@ export function Datatable<
           <Table.Container>
             {isTitleVisible(titleOptions) && (
               <Table.Title label={titleOptions.title} icon={titleOptions.icon}>
-                <SearchBar value={searchBarValue} onChange={setGlobalFilter} />
+                <SearchBar
+                  value={searchBarValue}
+                  onChange={handleSearchBarChange}
+                />
                 {renderTableActions && (
                   <Table.Actions>
                     {renderTableActions(selectedItems)}
@@ -172,6 +159,7 @@ export function Datatable<
                       role={role}
                       style={style}
                       headers={headerGroup.headers}
+                      onSortChange={handleSortChange}
                     />
                   );
                 })}
@@ -202,11 +190,11 @@ export function Datatable<
               <SelectedRowsCount value={selectedFlatRows.length} />
               <PaginationControls
                 showAll
-                pageLimit={pageSize}
-                page={pageIndex + 1}
-                onPageChange={(p) => gotoPage(p - 1)}
+                pageLimit={state.pageSize}
+                page={state.pageIndex + 1}
+                onPageChange={handlePageChange}
                 totalCount={totalCount}
-                onPageLimitChange={setPageSize}
+                onPageLimitChange={handlePageSizeChange}
               />
             </Table.Footer>
           </Table.Container>
@@ -214,6 +202,24 @@ export function Datatable<
       </div>
     </div>
   );
+
+  function handleSearchBarChange(value: string) {
+    setSearchBarValue(value);
+    setGlobalFilter(value);
+  }
+
+  function handleSortChange(colId: string, desc: boolean) {
+    settings.setSortBy(colId, desc);
+  }
+
+  function handlePageChange(page: number) {
+    gotoPage(page - 1);
+  }
+
+  function handlePageSizeChange(pageSize: number) {
+    setPageSize(pageSize);
+    settings.setPageSize(pageSize);
+  }
 }
 
 function isTitleVisible(

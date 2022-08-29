@@ -9,7 +9,6 @@ import {
   TableState,
   useExpanded,
   Row,
-  ActionType,
 } from 'react-table';
 import { Fragment, ReactNode } from 'react';
 import { useRowSelectColumn } from '@lineup-lite/hooks';
@@ -58,8 +57,11 @@ interface Props<
   isLoading?: boolean;
   totalCount?: number;
   renderSubRow(row: Row<D>): ReactNode;
-  stateReducer?(newState: TableState<D>, action: ActionType): TableState<D>;
   pageCount?: number;
+  onSortChange?(colId: string, desc: boolean): void;
+  onPageChange?(page: number): void;
+  onPageSizeChange?(pageSize: number): void;
+  onSearchChange?(search: string): void;
 }
 
 export function ExpandableDatatable<
@@ -81,8 +83,12 @@ export function ExpandableDatatable<
   initialTableState = {},
   isLoading,
   totalCount = dataset.length,
-  stateReducer = (state) => state,
   pageCount,
+
+  onSortChange = () => {},
+  onPageChange = () => {},
+  onPageSizeChange = () => {},
+  onSearchChange = () => {},
 }: Props<D, TSettings>) {
   const [searchBarValue, setSearchBarValue] = useSearchBarState(storageKey);
   const settings = useStore(settingsStore);
@@ -106,23 +112,6 @@ export function ExpandableDatatable<
       autoResetExpanded: false,
       autoResetSelectedRows: false,
       getRowId,
-      // todo move to callbacks
-      stateReducer: (newState, action) => {
-        switch (action.type) {
-          case 'setGlobalFilter':
-            setSearchBarValue(action.filterValue);
-            break;
-          case 'toggleSortBy':
-            settings.setSortBy(action.columnId, action.desc);
-            break;
-          case 'setPageSize':
-            settings.setPageSize(action.pageSize);
-            break;
-          default:
-            break;
-        }
-        return stateReducer(newState, action);
-      },
     },
     useFilters,
     useGlobalFilter,
@@ -143,7 +132,7 @@ export function ExpandableDatatable<
     gotoPage,
     setPageSize,
     setGlobalFilter,
-    state: { pageIndex, pageSize, globalFilter },
+    state,
   } = tableInstance;
 
   const tableProps = getTableProps();
@@ -159,8 +148,8 @@ export function ExpandableDatatable<
             {isTitleVisible(titleOptions) && (
               <Table.Title label={titleOptions.title} icon={titleOptions.icon}>
                 <SearchBar
-                  value={globalFilter || ''}
-                  onChange={setGlobalFilter}
+                  value={searchBarValue}
+                  onChange={handleSearchBarChange}
                 />
                 {renderTableActions && (
                   <Table.Actions>
@@ -188,6 +177,7 @@ export function ExpandableDatatable<
                       role={role}
                       style={style}
                       headers={headerGroup.headers}
+                      onSortChange={handleSortChange}
                     />
                   );
                 })}
@@ -234,11 +224,11 @@ export function ExpandableDatatable<
               <SelectedRowsCount value={selectedFlatRows.length} />
               <PaginationControls
                 showAll
-                pageLimit={pageSize}
-                page={pageIndex + 1}
-                onPageChange={(p) => gotoPage(p - 1)}
+                pageLimit={state.pageSize}
+                page={state.pageIndex + 1}
+                onPageChange={handlePageChange}
                 totalCount={totalCount}
-                onPageLimitChange={setPageSize}
+                onPageLimitChange={handlePageSizeChange}
               />
             </Table.Footer>
           </Table.Container>
@@ -246,6 +236,28 @@ export function ExpandableDatatable<
       </div>
     </div>
   );
+
+  function handleSearchBarChange(value: string) {
+    setSearchBarValue(value);
+    setGlobalFilter(value);
+    onSearchChange(value);
+  }
+
+  function handleSortChange(colId: string, desc: boolean) {
+    settings.setSortBy(colId, desc);
+    onSortChange(colId, desc);
+  }
+
+  function handlePageChange(page: number) {
+    gotoPage(page - 1);
+    onPageChange(page);
+  }
+
+  function handlePageSizeChange(pageSize: number) {
+    setPageSize(pageSize);
+    settings.setPageSize(pageSize);
+    onPageSizeChange(pageSize);
+  }
 }
 
 function isTitleVisible(
