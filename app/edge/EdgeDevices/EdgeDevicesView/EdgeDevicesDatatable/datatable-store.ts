@@ -12,8 +12,6 @@ import {
 
 import { TableSettings } from './types';
 
-export const TRUNCATE_LENGTH = 32;
-
 export function createStore(storageKey: string) {
   return createZustandStore<TableSettings>()(
     persist(
