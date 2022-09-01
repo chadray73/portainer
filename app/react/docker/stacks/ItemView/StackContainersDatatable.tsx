@@ -37,8 +37,10 @@ export interface Props {
 
 export function StackContainersDatatable({ environment, stackName }: Props) {
   const settings = useStore(settingsStore);
+
   const isGPUsColumnVisible = useShowGPUsColumn(environment.Id);
   const columns = useColumns(false, isGPUsColumnVisible);
+
   const hidableColumns = _.compact(
     columns.filter((col) => col.canHide).map((col) => col.id)
   );
