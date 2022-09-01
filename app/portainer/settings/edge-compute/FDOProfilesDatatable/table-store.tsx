@@ -7,10 +7,6 @@ import { paginationSettings, sortableSettings } from '@@/datatables/types';
 
 import { TableSettings } from './types';
 
-/**
- * use for default nested table store
- */
-
 export function createStoreHook(storageKey: string) {
   return createZustandStore<TableSettings>()(
     persist(
