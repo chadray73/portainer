@@ -9,33 +9,25 @@ import {
   TableInstance,
   TableState,
 } from 'react-table';
-import { ComponentType, ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { useRowSelectColumn } from '@lineup-lite/hooks';
 import { StoreApi, useStore } from 'zustand';
 
-import { PaginationControls } from '@@/PaginationControls';
-import { IconProps } from '@@/Icon';
-
 import { Table } from './Table';
 import { multiple } from './filter-types';
-import { SearchBar, useSearchBarState } from './SearchBar';
-import { SelectedRowsCount } from './SelectedRowsCount';
+import { useSearchBarState } from './SearchBar';
 import { TableSettingsProvider } from './useTableSettings';
 import { useRowSelect } from './useRowSelect';
 import { PaginationTableSettings, SortableTableSettings } from './types';
+import { DatatableHeader, TitleOptions } from './DatatableHeader';
+import { DatatableFooter } from './DatatableFooter';
+import { DatatableContent } from './DatatableContent';
+import { defaultGetRowId } from './defaultGetRowId';
+import { emptyPlugin } from './emptyReactTablePlugin';
 
 interface DefaultTableSettings
   extends SortableTableSettings,
     PaginationTableSettings {}
-
-interface TitleOptionsVisible {
-  title: string;
-  icon?: IconProps['icon'];
-  featherIcon?: IconProps['featherIcon'];
-  hide?: never;
-}
-
-type TitleOptions = TitleOptionsVisible | { hide: true };
 
 interface Props<
   D extends Record<string, unknown>,
@@ -55,6 +47,11 @@ interface Props<
   initialTableState?: Partial<TableState<D>>;
   isLoading?: boolean;
   totalCount?: number;
+  pageCount?: number;
+  onSortChange?(colId: string, desc: boolean): void;
+  onPageChange?(page: number): void;
+  onPageSizeChange?(pageSize: number): void;
+  onSearchChange?(search: string): void;
 }
 
 export function Datatable<
@@ -64,8 +61,8 @@ export function Datatable<
   columns,
   dataset,
   storageKey,
-  renderTableSettings,
-  renderTableActions,
+  renderTableSettings = () => null,
+  renderTableActions = () => null,
   settingsStore,
   disableSelect,
   getRowId = defaultGetRowId,
@@ -75,6 +72,12 @@ export function Datatable<
   initialTableState = {},
   isLoading,
   totalCount = dataset.length,
+  pageCount,
+
+  onSortChange = () => {},
+  onPageChange = () => {},
+  onPageSizeChange = () => {},
+  onSearchChange = () => {},
 }: Props<D, TSettings>) {
   const [searchBarValue, setSearchBarValue] = useSearchBarState(storageKey);
 
@@ -93,6 +96,9 @@ export function Datatable<
         ...initialTableState,
       },
       isRowSelectable,
+      manualPagination: typeof pageCount !== 'undefined',
+      pageCount,
+      autoResetExpanded: false,
       autoResetSelectedRows: false,
       getRowId,
     },
@@ -104,21 +110,8 @@ export function Datatable<
     !disableSelect ? useRowSelectColumn : emptyPlugin
   );
 
-  const {
-    selectedFlatRows,
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    page,
-    prepareRow,
-    gotoPage,
-    setPageSize,
-    setGlobalFilter,
-    state,
-  } = tableInstance;
-
-  const tableProps = getTableProps();
-  const tbodyProps = getTableBodyProps();
+  const { selectedFlatRows, gotoPage, setPageSize, setGlobalFilter, state } =
+    tableInstance;
 
   const selectedItems = selectedFlatRows.map((row) => row.original);
 
@@ -127,76 +120,37 @@ export function Datatable<
       <div className="col-sm-12">
         <TableSettingsProvider settings={settingsStore}>
           <Table.Container>
-            {isTitleVisible(titleOptions) && (
-              <Table.Title label={titleOptions.title} icon={titleOptions.icon}>
-                <SearchBar
-                  value={searchBarValue}
-                  onChange={handleSearchBarChange}
+            <DatatableHeader
+              onSearchChange={handleSearchBarChange}
+              searchValue={searchBarValue}
+              titleOptions={titleOptions}
+              renderTableActions={() => renderTableActions(selectedItems)}
+              renderTableSettings={() => renderTableSettings(tableInstance)}
+            />
+            <DatatableContent<D>
+              tableInstance={tableInstance}
+              renderRow={(row, { key, className, role, style }) => (
+                <Table.Row<D>
+                  key={key}
+                  cells={row.cells}
+                  className={className}
+                  role={role}
+                  style={style}
                 />
-                {renderTableActions && (
-                  <Table.Actions>
-                    {renderTableActions(selectedItems)}
-                  </Table.Actions>
-                )}
-                <Table.TitleActions>
-                  {!!renderTableSettings && renderTableSettings(tableInstance)}
-                </Table.TitleActions>
-              </Table.Title>
-            )}
-            <Table
-              className={tableProps.className}
-              role={tableProps.role}
-              style={tableProps.style}
-            >
-              <thead>
-                {headerGroups.map((headerGroup) => {
-                  const { key, className, role, style } =
-                    headerGroup.getHeaderGroupProps();
-                  return (
-                    <Table.HeaderRow<D>
-                      key={key}
-                      className={className}
-                      role={role}
-                      style={style}
-                      headers={headerGroup.headers}
-                      onSortChange={handleSortChange}
-                    />
-                  );
-                })}
-              </thead>
-              <tbody
-                className={tbodyProps.className}
-                role={tbodyProps.role}
-                style={tbodyProps.style}
-              >
-                <Table.Content<D>
-                  rows={page}
-                  isLoading={isLoading}
-                  prepareRow={prepareRow}
-                  emptyContent={emptyContentLabel}
-                  renderRow={(row, { key, className, role, style }) => (
-                    <Table.Row<D>
-                      cells={row.cells}
-                      key={key}
-                      className={className}
-                      role={role}
-                      style={style}
-                    />
-                  )}
-                />
-              </tbody>
-            </Table>
-            <Table.Footer>
-              <SelectedRowsCount value={selectedFlatRows.length} />
-              <PaginationControls
-                showAll
-                pageLimit={state.pageSize}
-                page={state.pageIndex + 1}
-                onPageChange={handlePageChange}
-                totalCount={totalCount}
-                onPageLimitChange={handlePageSizeChange}
-              />
-            </Table.Footer>
+              )}
+              emptyContentLabel={emptyContentLabel}
+              isLoading={isLoading}
+              onSortChange={handleSortChange}
+            />
+
+            <DatatableFooter
+              onPageChange={handlePageChange}
+              onPageSizeChange={handlePageSizeChange}
+              page={state.pageIndex}
+              pageSize={state.pageSize}
+              totalCount={totalCount}
+              totalSelected={selectedItems.length}
+            />
           </Table.Container>
         </TableSettingsProvider>
       </div>
@@ -206,44 +160,22 @@ export function Datatable<
   function handleSearchBarChange(value: string) {
     setSearchBarValue(value);
     setGlobalFilter(value);
+    onSearchChange(value);
   }
 
   function handleSortChange(colId: string, desc: boolean) {
     settings.setSortBy(colId, desc);
+    onSortChange(colId, desc);
   }
 
   function handlePageChange(page: number) {
-    gotoPage(page - 1);
+    gotoPage(page);
+    onPageChange(page);
   }
 
   function handlePageSizeChange(pageSize: number) {
     setPageSize(pageSize);
     settings.setPageSize(pageSize);
+    onPageSizeChange(pageSize);
   }
 }
-
-function isTitleVisible(
-  titleSettings: TitleOptions
-): titleSettings is TitleOptionsVisible {
-  return !titleSettings.hide;
-}
-
-function defaultGetRowId<D extends Record<string, unknown>>(row: D): string {
-  if (row.id && (typeof row.id === 'string' || typeof row.id === 'number')) {
-    return row.id.toString();
-  }
-
-  if (row.Id && (typeof row.Id === 'string' || typeof row.Id === 'number')) {
-    return row.Id.toString();
-  }
-
-  if (row.ID && (typeof row.ID === 'string' || typeof row.ID === 'number')) {
-    return row.ID.toString();
-  }
-
-  return '';
-}
-
-function emptyPlugin() {}
-
-emptyPlugin.pluginName = 'emptyPlugin';

@@ -12,6 +12,8 @@ import { Table } from './Table';
 import { multiple } from './filter-types';
 import { TableSettingsProvider } from './useTableSettings';
 import { NestedTable } from './NestedTable';
+import { DatatableContent } from './DatatableContent';
+import { defaultGetRowId } from './defaultGetRowId';
 
 interface DefaultTableSettings
   extends SortableTableSettings,
@@ -62,59 +64,25 @@ export function NestedDatatable<
     useSortBy
   );
 
-  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
-    tableInstance;
-
-  const tableProps = getTableProps();
-  const tbodyProps = getTableBodyProps();
-
   return (
     <NestedTable>
       <TableSettingsProvider settings={settingsStore}>
         <Table.Container>
-          <Table
-            className={tableProps.className}
-            role={tableProps.role}
-            style={tableProps.style}
-          >
-            <thead>
-              {headerGroups.map((headerGroup) => {
-                const { key, className, role, style } =
-                  headerGroup.getHeaderGroupProps();
-                return (
-                  <Table.HeaderRow<D>
-                    key={key}
-                    className={className}
-                    role={role}
-                    style={style}
-                    headers={headerGroup.headers}
-                    onSortChange={handleSortChange}
-                  />
-                );
-              })}
-            </thead>
-            <tbody
-              className={tbodyProps.className}
-              role={tbodyProps.role}
-              style={tbodyProps.style}
-            >
-              <Table.Content<D>
-                rows={rows}
-                isLoading={isLoading}
-                prepareRow={prepareRow}
-                emptyContent={emptyContentLabel}
-                renderRow={(row, { key, className, role, style }) => (
-                  <Table.Row<D>
-                    cells={row.cells}
-                    key={key}
-                    className={className}
-                    role={role}
-                    style={style}
-                  />
-                )}
+          <DatatableContent<D>
+            tableInstance={tableInstance}
+            isLoading={isLoading}
+            emptyContentLabel={emptyContentLabel}
+            renderRow={(row, { key, className, role, style }) => (
+              <Table.Row<D>
+                cells={row.cells}
+                key={key}
+                className={className}
+                role={role}
+                style={style}
               />
-            </tbody>
-          </Table>
+            )}
+            onSortChange={handleSortChange}
+          />
         </Table.Container>
       </TableSettingsProvider>
     </NestedTable>
@@ -124,23 +92,3 @@ export function NestedDatatable<
     settings.setSortBy(colId, desc);
   }
 }
-
-function defaultGetRowId<D extends Record<string, unknown>>(row: D): string {
-  if (row.id && (typeof row.id === 'string' || typeof row.id === 'number')) {
-    return row.id.toString();
-  }
-
-  if (row.Id && (typeof row.Id === 'string' || typeof row.Id === 'number')) {
-    return row.Id.toString();
-  }
-
-  if (row.ID && (typeof row.ID === 'string' || typeof row.ID === 'number')) {
-    return row.ID.toString();
-  }
-
-  return '';
-}
-
-function emptyPlugin() {}
-
-emptyPlugin.pluginName = 'emptyPlugin';
