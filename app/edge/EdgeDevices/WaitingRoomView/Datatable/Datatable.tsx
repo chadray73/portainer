@@ -1,7 +1,7 @@
 import { Environment } from '@/portainer/environments/types';
 import { notifySuccess } from '@/portainer/services/notifications';
-import { Datatable as GenericDatatable } from '@/react/components/datatables';
 
+import { Datatable as GenericDatatable } from '@@/datatables';
 import { Button } from '@@/buttons';
 import { TextTip } from '@@/Tip/TextTip';
 

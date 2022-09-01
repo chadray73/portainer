@@ -1,11 +1,9 @@
 import { createStore as createZustandStore } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-import {
-  paginationSettings,
-  sortableSettings,
-} from '@/react/components/datatables/types';
 import { keyBuilder } from '@/portainer/hooks/useLocalStorage';
+
+import { paginationSettings, sortableSettings } from '@@/datatables/types';
 
 import { TableSettings } from './types';
 
