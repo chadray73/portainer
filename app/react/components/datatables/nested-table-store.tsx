@@ -1,19 +1,9 @@
 import { createStore } from 'zustand';
 
-import {
-  paginationSettings,
-  PaginationTableSettings,
-  sortableSettings,
-  SortableTableSettings,
-} from '@@/datatables/types';
-
-interface TableSettings
-  extends SortableTableSettings,
-    PaginationTableSettings {}
+import { basicSettings, BasicTableSettings } from '@@/datatables/types';
 
 export function createNestedDatatableStoreHook(initialSortBy?: string) {
-  return createStore<TableSettings>()((set) => ({
-    ...sortableSettings(set, initialSortBy),
-    ...paginationSettings(set),
-  }));
+  return createStore<BasicTableSettings>()((set) =>
+    basicSettings(set, initialSortBy)
+  );
 }

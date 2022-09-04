@@ -59,3 +59,17 @@ export function refreshableSettings(
     setAutoRefreshRate: (autoRefreshRate: number) => set({ autoRefreshRate }),
   };
 }
+
+export interface BasicTableSettings
+  extends SortableTableSettings,
+    PaginationTableSettings {}
+
+export function basicSettings(
+  set: Set<BasicTableSettings>,
+  initialSortBy?: string
+): BasicTableSettings {
+  return {
+    ...sortableSettings(set, initialSortBy),
+    ...paginationSettings(set),
+  };
+}
