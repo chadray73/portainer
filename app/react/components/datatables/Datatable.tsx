@@ -8,6 +8,8 @@ import {
   Row,
   TableInstance,
   TableState,
+  TableRowProps,
+  useExpanded,
 } from 'react-table';
 import { ReactNode } from 'react';
 import { useRowSelectColumn } from '@lineup-lite/hooks';
@@ -26,7 +28,7 @@ interface DefaultTableSettings
   extends SortableTableSettings,
     PaginationTableSettings {}
 
-interface Props<D extends Record<string, unknown>> {
+export interface Props<D extends Record<string, unknown>> {
   dataset: D[];
   columns: readonly Column<D>[];
   renderTableSettings?(instance: TableInstance<D>): ReactNode;
@@ -50,6 +52,9 @@ interface Props<D extends Record<string, unknown>> {
 
   // send state up
   onPageChange?(page: number): void;
+
+  renderRow?(row: Row<D>, rowProps: TableRowProps): ReactNode;
+  expandable?: boolean;
 }
 
 export function Datatable<D extends Record<string, unknown>>({
@@ -75,6 +80,9 @@ export function Datatable<D extends Record<string, unknown>>({
   onSortByChange,
   searchValue,
   onSearchChange,
+
+  renderRow = defaultRenderRow,
+  expandable = false,
 }: Props<D>) {
   const tableInstance = useTable<D>(
     {
@@ -98,6 +106,7 @@ export function Datatable<D extends Record<string, unknown>>({
     useFilters,
     useGlobalFilter,
     useSortBy,
+    expandable ? useExpanded : emptyPlugin,
     usePagination,
     useRowSelect,
     !disableSelect ? useRowSelectColumn : emptyPlugin
@@ -120,15 +129,7 @@ export function Datatable<D extends Record<string, unknown>>({
           />
           <DatatableContent<D>
             tableInstance={tableInstance}
-            renderRow={(row, { key, className, role, style }) => (
-              <Table.Row<D>
-                key={key}
-                cells={row.cells}
-                className={className}
-                role={role}
-                style={style}
-              />
-            )}
+            renderRow={renderRow}
             emptyContentLabel={emptyContentLabel}
             isLoading={isLoading}
             onSortChange={handleSortChange}
@@ -165,4 +166,19 @@ export function Datatable<D extends Record<string, unknown>>({
     tableInstance.setPageSize(pageSize);
     onPageSizeChange(pageSize);
   }
+}
+
+function defaultRenderRow<D extends Record<string, unknown>>(
+  row: Row<D>,
+  rowProps: TableRowProps
+) {
+  return (
+    <Table.Row<D>
+      key={rowProps.key}
+      cells={row.cells}
+      className={rowProps.className}
+      role={rowProps.role}
+      style={rowProps.style}
+    />
+  );
 }

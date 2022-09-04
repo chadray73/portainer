@@ -99,8 +99,12 @@ export function EdgeDevicesDatatable({
             title: 'Edge Devices',
             icon: Box,
           }}
-          settingsStore={settingsStore}
-          storageKey={storageKey}
+          initialPageSize={settings.pageSize}
+          onPageSizeChange={settings.setPageSize}
+          initialSortBy={settings.sortBy}
+          onSortByChange={settings.setSortBy}
+          searchValue={search}
+          onSearchChange={setSearch}
           renderSubRow={(row) => (
             <tr>
               <td />
@@ -140,7 +144,6 @@ export function EdgeDevicesDatatable({
             );
           }}
           onPageChange={setPage}
-          onSearchChange={setSearch}
         />
       </RowProvider>
     </>
