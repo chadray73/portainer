@@ -35,7 +35,8 @@ export function FDOProfilesDatatable({
       onSortByChange={settings.setSortBy}
       searchValue={search}
       onSearchChange={setSearch}
-      titleOptions={{ title: 'Device Profiles', icon: List }}
+      title="Device Profiles"
+      titleIcon={List}
       disableSelect={!isFDOEnabled}
       emptyContentLabel="No profiles found"
       getRowId={(row) => row.id.toString()}

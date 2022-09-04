@@ -5,18 +5,9 @@ import { IconProps } from '@@/Icon';
 import { SearchBar } from './SearchBar';
 import { Table } from './Table';
 
-interface TitleOptionsVisible {
-  title: string;
-  icon?: IconProps['icon'];
-  featherIcon?: IconProps['featherIcon'];
-
-  hide?: never;
-}
-
-export type TitleOptions = TitleOptionsVisible | { hide: true };
-
 type Props = {
-  titleOptions: TitleOptions;
+  title?: string;
+  titleIcon?: IconProps['icon'];
   searchValue: string;
   onSearchChange(value: string): void;
   renderTableSettings?(): ReactNode;
@@ -28,16 +19,15 @@ export function DatatableHeader({
   renderTableActions,
   renderTableSettings,
   searchValue,
-  titleOptions,
+  title,
+  titleIcon,
 }: Props) {
-  if (!isTitleVisible(titleOptions)) {
+  if (!title) {
     return null;
   }
 
-  const { title, icon, featherIcon } = titleOptions;
-
   return (
-    <Table.Title label={title} icon={icon} featherIcon={featherIcon}>
+    <Table.Title label={title} icon={titleIcon}>
       <SearchBar value={searchValue} onChange={onSearchChange} />
       {renderTableActions && (
         <Table.Actions>{renderTableActions()}</Table.Actions>
@@ -47,10 +37,4 @@ export function DatatableHeader({
       </Table.TitleActions>
     </Table.Title>
   );
-}
-
-function isTitleVisible(
-  titleSettings: TitleOptions
-): titleSettings is TitleOptionsVisible {
-  return !titleSettings.hide;
 }

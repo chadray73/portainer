@@ -95,10 +95,8 @@ export function EdgeDevicesDatatable({
           columns={columns}
           isLoading={isLoading}
           totalCount={totalCount}
-          titleOptions={{
-            title: 'Edge Devices',
-            icon: Box,
-          }}
+          title="Edge Devices"
+          titleIcon={Box}
           initialPageSize={settings.pageSize}
           onPageSizeChange={settings.setPageSize}
           initialSortBy={settings.sortBy}

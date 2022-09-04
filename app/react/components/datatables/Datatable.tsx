@@ -14,11 +14,13 @@ import {
 import { ReactNode } from 'react';
 import { useRowSelectColumn } from '@lineup-lite/hooks';
 
+import { IconProps } from '@@/Icon';
+
 import { Table } from './Table';
 import { multiple } from './filter-types';
 import { useRowSelect } from './useRowSelect';
 import { BasicTableSettings } from './types';
-import { DatatableHeader, TitleOptions } from './DatatableHeader';
+import { DatatableHeader } from './DatatableHeader';
 import { DatatableFooter } from './DatatableFooter';
 import { DatatableContent } from './DatatableContent';
 import { defaultGetRowId } from './defaultGetRowId';
@@ -33,7 +35,8 @@ export interface Props<D extends Record<string, unknown>> {
   getRowId?(row: D): string;
   isRowSelectable?(row: Row<D>): boolean;
   emptyContentLabel?: string;
-  titleOptions: TitleOptions;
+  title?: string;
+  titleIcon?: IconProps['icon'];
   initialTableState?: Partial<TableState<D>>;
   isLoading?: boolean;
   totalCount?: number;
@@ -61,7 +64,8 @@ export function Datatable<D extends Record<string, unknown>>({
   disableSelect,
   getRowId = defaultGetRowId,
   isRowSelectable = () => true,
-  titleOptions,
+  title,
+  titleIcon,
   emptyContentLabel,
   initialTableState = {},
   isLoading,
@@ -119,7 +123,8 @@ export function Datatable<D extends Record<string, unknown>>({
           <DatatableHeader
             onSearchChange={handleSearchBarChange}
             searchValue={searchValue}
-            titleOptions={titleOptions}
+            title={title}
+            titleIcon={titleIcon}
             renderTableActions={() => renderTableActions(selectedItems)}
             renderTableSettings={() => renderTableSettings(tableInstance)}
           />

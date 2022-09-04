@@ -43,7 +43,8 @@ export function TeamsDatatable({ teams, isAdmin }: Props) {
       onSortByChange={settings.setSortBy}
       searchValue={search}
       onSearchChange={setSearch}
-      titleOptions={{ title: 'Teams', icon: Users }}
+      title="Teams"
+      titleIcon={Users}
       renderTableActions={(selectedRows) =>
         isAdmin && (
           <Button

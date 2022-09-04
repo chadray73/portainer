@@ -35,10 +35,8 @@ export function ContainersDatatable({ dataset, onRemoveClick }: Props) {
       onSortByChange={settings.setSortBy}
       searchValue={search}
       onSearchChange={setSearch}
-      titleOptions={{
-        title: 'Containers',
-        icon: Box,
-      }}
+      title="Containers"
+      titleIcon={Box}
       getRowId={(container) => container.id}
       emptyContentLabel="No container available."
       renderTableActions={(selectedRows) => (

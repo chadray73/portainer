@@ -39,7 +39,7 @@ export function Datatable({ devices, isLoading, totalCount }: Props) {
       onSortByChange={settings.setSortBy}
       searchValue={search}
       onSearchChange={setSearch}
-      titleOptions={{ title: 'Edge Devices Waiting Room' }}
+      title="Edge Devices Waiting Room"
       emptyContentLabel="No Edge Devices found"
       renderTableActions={(selectedRows) => (
         <>

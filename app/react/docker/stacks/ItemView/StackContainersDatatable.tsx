@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { useStore } from 'zustand';
+import { Box } from 'react-feather';
 
 import { DockerContainer } from '@/react/docker/containers/types';
 import { Environment } from '@/portainer/environments/types';
@@ -59,10 +60,8 @@ export function StackContainersDatatable({ environment, stackName }: Props) {
   return (
     <RowProvider context={{ environment }}>
       <Datatable
-        titleOptions={{
-          icon: 'fa-cubes',
-          title: 'Containers',
-        }}
+        title="Containers"
+        titleIcon={Box}
         initialPageSize={settings.pageSize}
         onPageSizeChange={settings.setPageSize}
         initialSortBy={settings.sortBy}
