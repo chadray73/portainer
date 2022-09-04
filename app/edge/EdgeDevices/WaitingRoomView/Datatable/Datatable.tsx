@@ -4,15 +4,15 @@ import { notifySuccess } from '@/portainer/services/notifications';
 import { Datatable as GenericDatatable } from '@@/datatables';
 import { Button } from '@@/buttons';
 import { TextTip } from '@@/Tip/TextTip';
+import { createPersistedStore } from '@@/datatables/types';
 
 import { useAssociateDeviceMutation, useLicenseOverused } from '../queries';
 
 import { columns } from './columns';
-import { createStore } from './store';
 
 const storageKey = 'edge-devices-waiting-room';
 
-const settingsStore = createStore(storageKey);
+const settingsStore = createPersistedStore(storageKey, 'Name');
 
 interface Props {
   devices: Environment[];

@@ -1,3 +1,8 @@
+import { createStore } from 'zustand';
+import { persist } from 'zustand/middleware';
+
+import { keyBuilder } from '@/portainer/hooks/useLocalStorage';
+
 export interface PaginationTableSettings {
   pageSize: number;
   setPageSize: (pageSize: number) => void;
@@ -72,4 +77,23 @@ export function basicSettings(
     ...sortableSettings(set, initialSortBy),
     ...paginationSettings(set),
   };
+}
+
+export function createPersistedStore<T extends BasicTableSettings>(
+  storageKey: string,
+  initialSortBy?: string,
+  create: (set: Set<T>) => Omit<T, keyof BasicTableSettings> = () => ({} as T)
+) {
+  return createStore<T>()(
+    persist(
+      (set) =>
+        ({
+          ...basicSettings(set as Set<BasicTableSettings>, initialSortBy),
+          ...create(set),
+        } as T),
+      {
+        name: keyBuilder(storageKey),
+      }
+    )
+  );
 }

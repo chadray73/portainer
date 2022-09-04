@@ -7,13 +7,13 @@ import { confirmDeletionAsync } from '@/portainer/services/modal.service/confirm
 import { Datatable } from '@@/datatables';
 import { Button } from '@@/buttons';
 import { Link } from '@@/Link';
+import { createPersistedStore } from '@@/datatables/types';
 
 import { columns } from './columns';
-import { createStoreHook } from './table-store';
 
 const tableKey = 'containergroups';
 
-const settingsStore = createStoreHook(tableKey);
+const settingsStore = createPersistedStore(tableKey, 'name');
 export interface Props {
   dataset: ContainerGroup[];
   onRemoveClick(containerIds: string[]): void;

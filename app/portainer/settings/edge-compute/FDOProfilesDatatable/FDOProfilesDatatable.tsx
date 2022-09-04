@@ -1,15 +1,15 @@
 import { List } from 'react-feather';
 
 import { Datatable } from '@@/datatables';
+import { createPersistedStore } from '@@/datatables/types';
 
 import { useColumns } from './columns';
 import { FDOProfilesDatatableActions } from './FDOProfilesDatatableActions';
-import { createStoreHook } from './table-store';
 import { useFDOProfiles } from './useFDOProfiles';
 
 const storageKey = 'fdoProfiles';
 
-const settingsStore = createStoreHook(storageKey);
+const settingsStore = createPersistedStore(storageKey, 'name');
 
 export interface FDOProfilesDatatableProps {
   isFDOEnabled: boolean;
