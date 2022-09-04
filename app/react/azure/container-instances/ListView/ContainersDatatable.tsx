@@ -1,4 +1,5 @@
 import { Box, Plus, Trash2 } from 'react-feather';
+import { useStore } from 'zustand';
 
 import { ContainerGroup } from '@/react/azure/types';
 import { Authorized } from '@/portainer/hooks/useUser';
@@ -8,6 +9,7 @@ import { Datatable } from '@@/datatables';
 import { Button } from '@@/buttons';
 import { Link } from '@@/Link';
 import { createPersistedStore } from '@@/datatables/types';
+import { useSearchBarState } from '@@/datatables/SearchBar';
 
 import { columns } from './columns';
 
@@ -20,12 +22,19 @@ export interface Props {
 }
 
 export function ContainersDatatable({ dataset, onRemoveClick }: Props) {
+  const settings = useStore(settingsStore);
+  const [search, setSearch] = useSearchBarState(tableKey);
+
   return (
     <Datatable
       dataset={dataset}
       columns={columns}
-      storageKey={tableKey}
-      settingsStore={settingsStore}
+      initialPageSize={settings.pageSize}
+      onPageSizeChange={settings.setPageSize}
+      initialSortBy={settings.sortBy}
+      onSortByChange={settings.setSortBy}
+      searchValue={search}
+      onSearchChange={setSearch}
       titleOptions={{
         title: 'Containers',
         icon: Box,

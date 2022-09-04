@@ -1,3 +1,5 @@
+import { useStore } from 'zustand';
+
 import { Environment } from '@/portainer/environments/types';
 import { notifySuccess } from '@/portainer/services/notifications';
 
@@ -5,6 +7,7 @@ import { Datatable as GenericDatatable } from '@@/datatables';
 import { Button } from '@@/buttons';
 import { TextTip } from '@@/Tip/TextTip';
 import { createPersistedStore } from '@@/datatables/types';
+import { useSearchBarState } from '@@/datatables/SearchBar';
 
 import { useAssociateDeviceMutation, useLicenseOverused } from '../queries';
 
@@ -23,14 +26,20 @@ interface Props {
 export function Datatable({ devices, isLoading, totalCount }: Props) {
   const associateMutation = useAssociateDeviceMutation();
   const licenseOverused = useLicenseOverused();
+  const settings = useStore(settingsStore);
+  const [search, setSearch] = useSearchBarState(storageKey);
 
   return (
     <GenericDatatable
       columns={columns}
       dataset={devices}
-      storageKey={storageKey}
+      initialPageSize={settings.pageSize}
+      onPageSizeChange={settings.setPageSize}
+      initialSortBy={settings.sortBy}
+      onSortByChange={settings.setSortBy}
+      searchValue={search}
+      onSearchChange={setSearch}
       titleOptions={{ title: 'Edge Devices Waiting Room' }}
-      settingsStore={settingsStore}
       emptyContentLabel="No Edge Devices found"
       renderTableActions={(selectedRows) => (
         <>

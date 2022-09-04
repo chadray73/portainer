@@ -11,12 +11,9 @@ import {
 } from 'react-table';
 import { ReactNode } from 'react';
 import { useRowSelectColumn } from '@lineup-lite/hooks';
-import { StoreApi, useStore } from 'zustand';
 
 import { Table } from './Table';
 import { multiple } from './filter-types';
-import { useSearchBarState } from './SearchBar';
-import { TableSettingsProvider } from './useTableSettings';
 import { useRowSelect } from './useRowSelect';
 import { PaginationTableSettings, SortableTableSettings } from './types';
 import { DatatableHeader, TitleOptions } from './DatatableHeader';
@@ -29,16 +26,11 @@ interface DefaultTableSettings
   extends SortableTableSettings,
     PaginationTableSettings {}
 
-interface Props<
-  D extends Record<string, unknown>,
-  TSettings extends DefaultTableSettings
-> {
+interface Props<D extends Record<string, unknown>> {
   dataset: D[];
-  storageKey: string;
   columns: readonly Column<D>[];
   renderTableSettings?(instance: TableInstance<D>): ReactNode;
   renderTableActions?(selectedRows: D[]): ReactNode;
-  settingsStore: StoreApi<TSettings>;
   disableSelect?: boolean;
   getRowId?(row: D): string;
   isRowSelectable?(row: Row<D>): boolean;
@@ -48,22 +40,23 @@ interface Props<
   isLoading?: boolean;
   totalCount?: number;
   pageCount?: number;
-  onSortChange?(colId: string, desc: boolean): void;
+  initialSortBy?: DefaultTableSettings['sortBy'];
+  initialPageSize?: DefaultTableSettings['pageSize'];
+
+  searchValue: string;
+  onSearchChange(search: string): void;
+  onSortByChange(colId: string, desc: boolean): void;
+  onPageSizeChange(pageSize: number): void;
+
+  // send state up
   onPageChange?(page: number): void;
-  onPageSizeChange?(pageSize: number): void;
-  onSearchChange?(search: string): void;
 }
 
-export function Datatable<
-  D extends Record<string, unknown>,
-  TSettings extends DefaultTableSettings
->({
+export function Datatable<D extends Record<string, unknown>>({
   columns,
   dataset,
-  storageKey,
   renderTableSettings = () => null,
   renderTableActions = () => null,
-  settingsStore,
   disableSelect,
   getRowId = defaultGetRowId,
   isRowSelectable = () => true,
@@ -74,15 +67,15 @@ export function Datatable<
   totalCount = dataset.length,
   pageCount,
 
-  onSortChange = () => {},
+  initialSortBy,
+  initialPageSize = 10,
   onPageChange = () => {},
-  onPageSizeChange = () => {},
-  onSearchChange = () => {},
-}: Props<D, TSettings>) {
-  const [searchBarValue, setSearchBarValue] = useSearchBarState(storageKey);
 
-  const settings = useStore(settingsStore);
-
+  onPageSizeChange,
+  onSortByChange,
+  searchValue,
+  onSearchChange,
+}: Props<D>) {
   const tableInstance = useTable<D>(
     {
       defaultCanFilter: false,
@@ -90,9 +83,9 @@ export function Datatable<
       data: dataset,
       filterTypes: { multiple },
       initialState: {
-        pageSize: settings.pageSize || 10,
-        sortBy: [settings.sortBy],
-        globalFilter: searchBarValue,
+        pageSize: initialPageSize,
+        sortBy: initialSortBy ? [initialSortBy] : [],
+        globalFilter: searchValue,
         ...initialTableState,
       },
       isRowSelectable,
@@ -110,72 +103,66 @@ export function Datatable<
     !disableSelect ? useRowSelectColumn : emptyPlugin
   );
 
-  const { selectedFlatRows, gotoPage, setPageSize, setGlobalFilter, state } =
-    tableInstance;
-
-  const selectedItems = selectedFlatRows.map((row) => row.original);
+  const selectedItems = tableInstance.selectedFlatRows.map(
+    (row) => row.original
+  );
 
   return (
     <div className="row">
       <div className="col-sm-12">
-        <TableSettingsProvider settings={settingsStore}>
-          <Table.Container>
-            <DatatableHeader
-              onSearchChange={handleSearchBarChange}
-              searchValue={searchBarValue}
-              titleOptions={titleOptions}
-              renderTableActions={() => renderTableActions(selectedItems)}
-              renderTableSettings={() => renderTableSettings(tableInstance)}
-            />
-            <DatatableContent<D>
-              tableInstance={tableInstance}
-              renderRow={(row, { key, className, role, style }) => (
-                <Table.Row<D>
-                  key={key}
-                  cells={row.cells}
-                  className={className}
-                  role={role}
-                  style={style}
-                />
-              )}
-              emptyContentLabel={emptyContentLabel}
-              isLoading={isLoading}
-              onSortChange={handleSortChange}
-            />
+        <Table.Container>
+          <DatatableHeader
+            onSearchChange={handleSearchBarChange}
+            searchValue={searchValue}
+            titleOptions={titleOptions}
+            renderTableActions={() => renderTableActions(selectedItems)}
+            renderTableSettings={() => renderTableSettings(tableInstance)}
+          />
+          <DatatableContent<D>
+            tableInstance={tableInstance}
+            renderRow={(row, { key, className, role, style }) => (
+              <Table.Row<D>
+                key={key}
+                cells={row.cells}
+                className={className}
+                role={role}
+                style={style}
+              />
+            )}
+            emptyContentLabel={emptyContentLabel}
+            isLoading={isLoading}
+            onSortChange={handleSortChange}
+          />
 
-            <DatatableFooter
-              onPageChange={handlePageChange}
-              onPageSizeChange={handlePageSizeChange}
-              page={state.pageIndex}
-              pageSize={state.pageSize}
-              totalCount={totalCount}
-              totalSelected={selectedItems.length}
-            />
-          </Table.Container>
-        </TableSettingsProvider>
+          <DatatableFooter
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+            page={tableInstance.state.pageIndex}
+            pageSize={tableInstance.state.pageSize}
+            totalCount={totalCount}
+            totalSelected={selectedItems.length}
+          />
+        </Table.Container>
       </div>
     </div>
   );
 
   function handleSearchBarChange(value: string) {
-    setSearchBarValue(value);
-    setGlobalFilter(value);
+    tableInstance.setGlobalFilter(value);
     onSearchChange(value);
   }
 
   function handleSortChange(colId: string, desc: boolean) {
-    settings.setSortBy(colId, desc);
-    onSortChange(colId, desc);
+    onSortByChange(colId, desc);
   }
 
   function handlePageChange(page: number) {
-    gotoPage(page);
+    tableInstance.gotoPage(page);
     onPageChange(page);
   }
 
   function handlePageSizeChange(pageSize: number) {
-    setPageSize(pageSize);
-    settings.setPageSize(pageSize);
+    tableInstance.setPageSize(pageSize);
     onPageSizeChange(pageSize);
   }
 }

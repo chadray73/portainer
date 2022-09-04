@@ -134,7 +134,7 @@ export function EdgeDevicesDatatable({
                   value={settings.hiddenColumns}
                 />
                 <TableSettingsMenu>
-                  <EdgeDevicesDatatableSettings />
+                  <EdgeDevicesDatatableSettings settings={settings} />
                 </TableSettingsMenu>
               </>
             );

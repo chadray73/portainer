@@ -15,6 +15,7 @@ import {
   QuickActionsSettings,
 } from '@@/datatables/QuickActionsSettings';
 import { ColumnVisibilityMenu } from '@@/datatables/ColumnVisibilityMenu';
+import { useSearchBarState } from '@@/datatables/SearchBar';
 
 import { useContainers } from '../../containers/queries/containers';
 import { RowProvider } from '../../containers/ListView/ContainersDatatable/RowContext';
@@ -37,6 +38,7 @@ export interface Props {
 
 export function StackContainersDatatable({ environment, stackName }: Props) {
   const settings = useStore(settingsStore);
+  const [search, setSearch] = useSearchBarState(storageKey);
 
   const isGPUsColumnVisible = useShowGPUsColumn(environment.Id);
   const columns = useColumns(false, isGPUsColumnVisible);
@@ -61,7 +63,12 @@ export function StackContainersDatatable({ environment, stackName }: Props) {
           icon: 'fa-cubes',
           title: 'Containers',
         }}
-        settingsStore={settingsStore}
+        initialPageSize={settings.pageSize}
+        onPageSizeChange={settings.setPageSize}
+        initialSortBy={settings.sortBy}
+        onSortByChange={settings.setSortBy}
+        searchValue={search}
+        onSearchChange={setSearch}
         columns={columns}
         renderTableActions={(selectedRows) => (
           <ContainersDatatableActions
@@ -94,7 +101,6 @@ export function StackContainersDatatable({ environment, stackName }: Props) {
             </>
           );
         }}
-        storageKey={storageKey}
         dataset={containersQuery.data || []}
         isLoading={containersQuery.isLoading}
         emptyContentLabel="No containers found"

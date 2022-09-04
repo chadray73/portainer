@@ -1,7 +1,9 @@
 import { List } from 'react-feather';
+import { useStore } from 'zustand';
 
 import { Datatable } from '@@/datatables';
 import { createPersistedStore } from '@@/datatables/types';
+import { useSearchBarState } from '@@/datatables/SearchBar';
 
 import { useColumns } from './columns';
 import { FDOProfilesDatatableActions } from './FDOProfilesDatatableActions';
@@ -19,14 +21,20 @@ export function FDOProfilesDatatable({
   isFDOEnabled,
 }: FDOProfilesDatatableProps) {
   const columns = useColumns();
+  const settings = useStore(settingsStore);
+  const [search, setSearch] = useSearchBarState(storageKey);
   const { isLoading, profiles } = useFDOProfiles();
 
   return (
     <Datatable
       columns={columns}
       dataset={profiles}
-      settingsStore={settingsStore}
-      storageKey={storageKey}
+      initialPageSize={settings.pageSize}
+      onPageSizeChange={settings.setPageSize}
+      initialSortBy={settings.sortBy}
+      onSortByChange={settings.setSortBy}
+      searchValue={search}
+      onSearchChange={setSearch}
       titleOptions={{ title: 'Device Profiles', icon: List }}
       disableSelect={!isFDOEnabled}
       emptyContentLabel="No profiles found"

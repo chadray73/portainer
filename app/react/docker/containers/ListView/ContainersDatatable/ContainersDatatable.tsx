@@ -11,6 +11,8 @@ import {
   QuickActionsSettings,
 } from '@@/datatables/QuickActionsSettings';
 import { ColumnVisibilityMenu } from '@@/datatables/ColumnVisibilityMenu';
+import { useSearchBarState } from '@@/datatables/SearchBar';
+import { TableSettingsProvider } from '@@/datatables/useTableSettings';
 
 import { useContainers } from '../../queries/containers';
 
@@ -47,6 +49,8 @@ export function ContainersDatatable({
     columns.filter((col) => col.canHide).map((col) => col.id)
   );
 
+  const [search, setSearch] = useSearchBarState(storageKey);
+
   const containersQuery = useContainers(
     environment.Id,
     true,
@@ -56,53 +60,59 @@ export function ContainersDatatable({
 
   return (
     <RowProvider context={{ environment }}>
-      <Datatable
-        titleOptions={{
-          icon: 'fa-cubes',
-          title: 'Containers',
-        }}
-        settingsStore={settingsStore}
-        columns={columns}
-        renderTableActions={(selectedRows) => (
-          <ContainersDatatableActions
-            selectedItems={selectedRows}
-            isAddActionVisible
-            endpointId={environment.Id}
-          />
-        )}
-        isLoading={containersQuery.isLoading}
-        isRowSelectable={(row) => !row.original.IsPortainer}
-        initialTableState={{ hiddenColumns: settings.hiddenColumns }}
-        renderTableSettings={(tableInstance) => {
-          const columnsToHide = tableInstance.allColumns.filter((colInstance) =>
-            hidableColumns?.includes(colInstance.id)
-          );
+      <TableSettingsProvider settings={settingsStore}>
+        <Datatable
+          titleOptions={{
+            icon: 'fa-cubes',
+            title: 'Containers',
+          }}
+          initialPageSize={settings.pageSize}
+          onPageSizeChange={settings.setPageSize}
+          initialSortBy={settings.sortBy}
+          onSortByChange={settings.setSortBy}
+          searchValue={search}
+          onSearchChange={setSearch}
+          columns={columns}
+          renderTableActions={(selectedRows) => (
+            <ContainersDatatableActions
+              selectedItems={selectedRows}
+              isAddActionVisible
+              endpointId={environment.Id}
+            />
+          )}
+          isLoading={containersQuery.isLoading}
+          isRowSelectable={(row) => !row.original.IsPortainer}
+          initialTableState={{ hiddenColumns: settings.hiddenColumns }}
+          renderTableSettings={(tableInstance) => {
+            const columnsToHide = tableInstance.allColumns.filter(
+              (colInstance) => hidableColumns?.includes(colInstance.id)
+            );
 
-          return (
-            <>
-              <ColumnVisibilityMenu<DockerContainer>
-                columns={columnsToHide}
-                onChange={(hiddenColumns) => {
-                  settings.setHiddenColumns(hiddenColumns);
-                  tableInstance.setHiddenColumns(hiddenColumns);
-                }}
-                value={settings.hiddenColumns}
-              />
-              <TableSettingsMenu
-                quickActions={<QuickActionsSettings actions={actions} />}
-              >
-                <ContainersDatatableSettings
-                  isRefreshVisible
-                  settings={settings}
+            return (
+              <>
+                <ColumnVisibilityMenu<DockerContainer>
+                  columns={columnsToHide}
+                  onChange={(hiddenColumns) => {
+                    settings.setHiddenColumns(hiddenColumns);
+                    tableInstance.setHiddenColumns(hiddenColumns);
+                  }}
+                  value={settings.hiddenColumns}
                 />
-              </TableSettingsMenu>
-            </>
-          );
-        }}
-        storageKey={storageKey}
-        dataset={containersQuery.data || []}
-        emptyContentLabel="No containers found"
-      />
+                <TableSettingsMenu
+                  quickActions={<QuickActionsSettings actions={actions} />}
+                >
+                  <ContainersDatatableSettings
+                    isRefreshVisible
+                    settings={settings}
+                  />
+                </TableSettingsMenu>
+              </>
+            );
+          }}
+          dataset={containersQuery.data || []}
+          emptyContentLabel="No containers found"
+        />
+      </TableSettingsProvider>
     </RowProvider>
   );
 }

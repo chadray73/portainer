@@ -1,6 +1,7 @@
 import { Column } from 'react-table';
 import { useMutation, useQueryClient } from 'react-query';
 import { Trash2, Users } from 'react-feather';
+import { useStore } from 'zustand';
 
 import { notifySuccess } from '@/portainer/services/notifications';
 import { promiseSequence } from '@/portainer/helpers/promise-utils';
@@ -12,8 +13,9 @@ import { Datatable } from '@@/datatables';
 import { Button } from '@@/buttons';
 import { buildNameColumn } from '@@/datatables/NameCell';
 import { createPersistedStore } from '@@/datatables/types';
+import { useSearchBarState } from '@@/datatables/SearchBar';
 
-const tableKey = 'teams';
+const storageKey = 'teams';
 
 const columns: readonly Column<Team>[] = [
   buildNameColumn('Name', 'Id', 'portainer.teams.team'),
@@ -24,17 +26,23 @@ interface Props {
   isAdmin: boolean;
 }
 
-const store = createPersistedStore(tableKey);
+const settingsStore = createPersistedStore(storageKey);
 
 export function TeamsDatatable({ teams, isAdmin }: Props) {
   const { handleRemove } = useRemoveMutation();
+  const settings = useStore(settingsStore);
+  const [search, setSearch] = useSearchBarState(storageKey);
 
   return (
     <Datatable
       dataset={teams}
       columns={columns}
-      storageKey={tableKey}
-      settingsStore={store}
+      initialPageSize={settings.pageSize}
+      onPageSizeChange={settings.setPageSize}
+      initialSortBy={settings.sortBy}
+      onSortByChange={settings.setSortBy}
+      searchValue={search}
+      onSearchChange={setSearch}
       titleOptions={{ title: 'Teams', icon: Users }}
       renderTableActions={(selectedRows) =>
         isAdmin && (
