@@ -17,16 +17,12 @@ import { useRowSelectColumn } from '@lineup-lite/hooks';
 import { Table } from './Table';
 import { multiple } from './filter-types';
 import { useRowSelect } from './useRowSelect';
-import { PaginationTableSettings, SortableTableSettings } from './types';
+import { BasicTableSettings } from './types';
 import { DatatableHeader, TitleOptions } from './DatatableHeader';
 import { DatatableFooter } from './DatatableFooter';
 import { DatatableContent } from './DatatableContent';
 import { defaultGetRowId } from './defaultGetRowId';
 import { emptyPlugin } from './emptyReactTablePlugin';
-
-interface DefaultTableSettings
-  extends SortableTableSettings,
-    PaginationTableSettings {}
 
 export interface Props<D extends Record<string, unknown>> {
   dataset: D[];
@@ -42,8 +38,8 @@ export interface Props<D extends Record<string, unknown>> {
   isLoading?: boolean;
   totalCount?: number;
   pageCount?: number;
-  initialSortBy?: DefaultTableSettings['sortBy'];
-  initialPageSize?: DefaultTableSettings['pageSize'];
+  initialSortBy?: BasicTableSettings['sortBy'];
+  initialPageSize?: BasicTableSettings['pageSize'];
 
   searchValue: string;
   onSearchChange(search: string): void;
