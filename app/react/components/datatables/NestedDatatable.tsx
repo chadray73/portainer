@@ -5,44 +5,33 @@ import {
   Column,
   TableState,
 } from 'react-table';
-import { StoreApi, useStore } from 'zustand';
 
-import { BasicTableSettings } from './types';
 import { Table } from './Table';
 import { multiple } from './filter-types';
-import { TableSettingsProvider } from './useTableSettings';
 import { NestedTable } from './NestedTable';
 import { DatatableContent } from './DatatableContent';
 import { defaultGetRowId } from './defaultGetRowId';
 
-interface Props<
-  D extends Record<string, unknown>,
-  TSettings extends StoreApi<BasicTableSettings>
-> {
+interface Props<D extends Record<string, unknown>> {
   dataset: D[];
   columns: readonly Column<D>[];
 
-  settingsStore: TSettings;
   getRowId?(row: D): string;
   emptyContentLabel?: string;
   initialTableState?: Partial<TableState<D>>;
   isLoading?: boolean;
+  defaultSortBy?: string;
 }
 
-export function NestedDatatable<
-  D extends Record<string, unknown>,
-  TSettings extends StoreApi<BasicTableSettings>
->({
+export function NestedDatatable<D extends Record<string, unknown>>({
   columns,
   dataset,
-  settingsStore,
   getRowId = defaultGetRowId,
   emptyContentLabel,
   initialTableState = {},
   isLoading,
-}: Props<D, TSettings>) {
-  const settings = useStore(settingsStore);
-
+  defaultSortBy,
+}: Props<D>) {
   const tableInstance = useTable<D>(
     {
       defaultCanFilter: false,
@@ -50,7 +39,7 @@ export function NestedDatatable<
       data: dataset,
       filterTypes: { multiple },
       initialState: {
-        sortBy: [settings.sortBy],
+        sortBy: defaultSortBy ? [{ id: defaultSortBy, desc: true }] : [],
         ...initialTableState,
       },
       autoResetSelectedRows: false,
@@ -62,29 +51,22 @@ export function NestedDatatable<
 
   return (
     <NestedTable>
-      <TableSettingsProvider settings={settingsStore}>
-        <Table.Container>
-          <DatatableContent<D>
-            tableInstance={tableInstance}
-            isLoading={isLoading}
-            emptyContentLabel={emptyContentLabel}
-            renderRow={(row, { key, className, role, style }) => (
-              <Table.Row<D>
-                cells={row.cells}
-                key={key}
-                className={className}
-                role={role}
-                style={style}
-              />
-            )}
-            onSortChange={handleSortChange}
-          />
-        </Table.Container>
-      </TableSettingsProvider>
+      <Table.Container>
+        <DatatableContent<D>
+          tableInstance={tableInstance}
+          isLoading={isLoading}
+          emptyContentLabel={emptyContentLabel}
+          renderRow={(row, { key, className, role, style }) => (
+            <Table.Row<D>
+              cells={row.cells}
+              key={key}
+              className={className}
+              role={role}
+              style={style}
+            />
+          )}
+        />
+      </Table.Container>
     </NestedTable>
   );
-
-  function handleSortChange(colId: string, desc: boolean) {
-    settings.setSortBy(colId, desc);
-  }
 }
