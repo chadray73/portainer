@@ -69,16 +69,6 @@ export interface BasicTableSettings
   extends SortableTableSettings,
     PaginationTableSettings {}
 
-export function basicSettings(
-  set: Set<BasicTableSettings>,
-  initialSortBy?: string
-): BasicTableSettings {
-  return {
-    ...sortableSettings(set, initialSortBy),
-    ...paginationSettings(set),
-  };
-}
-
 export function createPersistedStore<T extends BasicTableSettings>(
   storageKey: string,
   initialSortBy?: string,
@@ -88,7 +78,8 @@ export function createPersistedStore<T extends BasicTableSettings>(
     persist(
       (set) =>
         ({
-          ...basicSettings(set as Set<BasicTableSettings>, initialSortBy),
+          ...sortableSettings(set as Set<SortableTableSettings>, initialSortBy),
+          ...paginationSettings(set as Set<PaginationTableSettings>),
           ...create(set),
         } as T),
       {

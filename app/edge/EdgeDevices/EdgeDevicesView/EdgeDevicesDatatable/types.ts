@@ -1,8 +1,7 @@
 import {
-  PaginationTableSettings,
+  BasicTableSettings,
   RefreshableTableSettings,
   SettableColumnsTableSettings,
-  SortableTableSettings,
 } from '@@/datatables/types';
 
 export interface Pagination {
@@ -11,7 +10,6 @@ export interface Pagination {
 }
 
 export interface TableSettings
-  extends SortableTableSettings,
-    PaginationTableSettings,
+  extends BasicTableSettings,
     SettableColumnsTableSettings,
     RefreshableTableSettings {}

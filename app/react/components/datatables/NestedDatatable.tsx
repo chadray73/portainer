@@ -7,7 +7,7 @@ import {
 } from 'react-table';
 import { StoreApi, useStore } from 'zustand';
 
-import { PaginationTableSettings, SortableTableSettings } from './types';
+import { BasicTableSettings } from './types';
 import { Table } from './Table';
 import { multiple } from './filter-types';
 import { TableSettingsProvider } from './useTableSettings';
@@ -15,13 +15,9 @@ import { NestedTable } from './NestedTable';
 import { DatatableContent } from './DatatableContent';
 import { defaultGetRowId } from './defaultGetRowId';
 
-interface DefaultTableSettings
-  extends SortableTableSettings,
-    PaginationTableSettings {}
-
 interface Props<
   D extends Record<string, unknown>,
-  TSettings extends StoreApi<DefaultTableSettings>
+  TSettings extends StoreApi<BasicTableSettings>
 > {
   dataset: D[];
   columns: readonly Column<D>[];
@@ -35,7 +31,7 @@ interface Props<
 
 export function NestedDatatable<
   D extends Record<string, unknown>,
-  TSettings extends StoreApi<DefaultTableSettings>
+  TSettings extends StoreApi<BasicTableSettings>
 >({
   columns,
   dataset,
