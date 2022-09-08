@@ -8,13 +8,13 @@ export interface PaginationTableSettings {
   setPageSize: (pageSize: number) => void;
 }
 
-type Set<T> = (
+type ZustandSetFunc<T> = (
   partial: T | Partial<T> | ((state: T) => T | Partial<T>),
   replace?: boolean | undefined
 ) => void;
 
 export function paginationSettings(
-  set: Set<PaginationTableSettings>
+  set: ZustandSetFunc<PaginationTableSettings>
 ): PaginationTableSettings {
   return {
     pageSize: 10,
@@ -28,7 +28,7 @@ export interface SortableTableSettings {
 }
 
 export function sortableSettings(
-  set: Set<SortableTableSettings>,
+  set: ZustandSetFunc<SortableTableSettings>,
   initialSortBy = 'name'
 ): SortableTableSettings {
   return {
@@ -43,7 +43,7 @@ export interface SettableColumnsTableSettings {
 }
 
 export function hiddenColumnsSettings(
-  set: Set<SettableColumnsTableSettings>
+  set: ZustandSetFunc<SettableColumnsTableSettings>
 ): SettableColumnsTableSettings {
   return {
     hiddenColumns: [],
@@ -57,7 +57,7 @@ export interface RefreshableTableSettings {
 }
 
 export function refreshableSettings(
-  set: Set<RefreshableTableSettings>
+  set: ZustandSetFunc<RefreshableTableSettings>
 ): RefreshableTableSettings {
   return {
     autoRefreshRate: 0,
@@ -72,14 +72,18 @@ export interface BasicTableSettings
 export function createPersistedStore<T extends BasicTableSettings>(
   storageKey: string,
   initialSortBy?: string,
-  create: (set: Set<T>) => Omit<T, keyof BasicTableSettings> = () => ({} as T)
+  create: (set: ZustandSetFunc<T>) => Omit<T, keyof BasicTableSettings> = () =>
+    ({} as T)
 ) {
   return createStore<T>()(
     persist(
       (set) =>
         ({
-          ...sortableSettings(set as Set<SortableTableSettings>, initialSortBy),
-          ...paginationSettings(set as Set<PaginationTableSettings>),
+          ...sortableSettings(
+            set as ZustandSetFunc<SortableTableSettings>,
+            initialSortBy
+          ),
+          ...paginationSettings(set as ZustandSetFunc<PaginationTableSettings>),
           ...create(set),
         } as T),
       {
