@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Formik, Field, Form } from 'formik';
 
 import { FDOConfiguration } from '@/portainer/hostmanagement/fdo/model';
-import { FDOProfilesDatatableContainer } from '@/portainer/settings/edge-compute/FDOProfilesDatatable/FDOProfilesDatatableContainer';
+import { FDOProfilesDatatable } from '@/portainer/settings/edge-compute/FDOProfilesDatatable';
 
 import { Switch } from '@@/form-components/SwitchField/Switch';
 import { FormControl } from '@@/form-components/FormControl';
@@ -164,7 +164,7 @@ export function SettingsFDO({ settings, onSubmit }: Props) {
                 Add, Edit and Manage the list of device profiles available
                 during FDO device setup
               </TextTip>
-              <FDOProfilesDatatableContainer isFDOEnabled={initialFDOEnabled} />
+              <FDOProfilesDatatable isFDOEnabled={initialFDOEnabled} />
             </div>
           )}
         </WidgetBody>
