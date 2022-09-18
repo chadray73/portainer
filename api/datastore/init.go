@@ -7,7 +7,12 @@ import (
 
 // Init creates the default data set.
 func (store *Store) Init() error {
-	err := store.checkOrCreateInstanceID()
+	err := store.VersionService.Migrate()
+	if err != nil {
+		return err
+	}
+
+	err = store.checkOrCreateInstanceID()
 	if err != nil {
 		return err
 	}
