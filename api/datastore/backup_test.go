@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/database/models"
 )
 
 func TestCreateBackupFolders(t *testing.T) {
@@ -45,10 +46,13 @@ func TestBackup(t *testing.T) {
 	defer teardown()
 
 	t.Run("Backup should create default db backup", func(t *testing.T) {
-		store.VersionService.StoreDBVersion(portainer.DBVersion)
+		v := models.Version{
+			SchemaVersion: portainer.APIVersion,
+		}
+		store.VersionService.UpdateVersion(&v)
 		store.backupWithOptions(nil)
 
-		backupFileName := path.Join(connection.GetStorePath(), "backups", "common", fmt.Sprintf("portainer.edb.%03d.*", portainer.DBVersion))
+		backupFileName := path.Join(connection.GetStorePath(), "backups", "common", fmt.Sprintf("portainer.edb.%s.*", portainer.APIVersion))
 		if !isFileExist(backupFileName) {
 			t.Errorf("Expect backup file to be created %s", backupFileName)
 		}
