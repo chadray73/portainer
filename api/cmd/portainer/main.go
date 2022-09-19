@@ -19,6 +19,7 @@ import (
 	"github.com/portainer/portainer/api/crypto"
 	"github.com/portainer/portainer/api/database"
 	"github.com/portainer/portainer/api/database/boltdb"
+	"github.com/portainer/portainer/api/database/models"
 	"github.com/portainer/portainer/api/dataservices"
 	"github.com/portainer/portainer/api/datastore"
 	"github.com/portainer/portainer/api/demo"
@@ -43,6 +44,7 @@ import (
 	"github.com/portainer/portainer/api/scheduler"
 	"github.com/portainer/portainer/api/stacks"
 
+	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 )
 
@@ -109,20 +111,30 @@ func initDataStore(flags *portainer.CLIFlags, secretKey []byte, fileService port
 	}
 
 	if isNew {
+		fmt.Println("New DB created")
+		uid := uuid.New()
+
 		// from MigrateData
-		store.VersionService.StoreDBVersion(portainer.DBVersion)
+		v := models.Version{
+			SchemaVersion: portainer.APIVersion,
+			Edition:       int(portainer.PortainerCE),
+			InstanceID:    uid.String(),
+		}
+		store.VersionService.UpdateVersion(&v)
 
 		err := updateSettingsFromFlags(store, flags)
 		if err != nil {
 			log.Fatal().Err(err).Msg("failed updating settings from flags")
 		}
 	} else {
-		storedVersion, err := store.VersionService.DBVersion()
+		storeVersion, err := store.VersionService.Version()
 		if err != nil {
 			log.Fatal().Err(err).Msg("failure during creation of new database")
 		}
 
-		if storedVersion != portainer.DBVersion {
+		fmt.Println("Database already initialized. Schema version:", storeVersion.SchemaVersion)
+		fmt.Println("Portainer version:", portainer.APIVersion)
+		if storeVersion.SchemaVersion != portainer.APIVersion {
 			err = store.MigrateData()
 			if err != nil {
 				log.Fatal().Err(err).Msg("failed migration")

@@ -1,10 +1,11 @@
 package version
 
 import (
-	"strconv"
+	"fmt"
 
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/database/models"
+	"github.com/portainer/portainer/api/dataservices"
 )
 
 const (
@@ -35,17 +36,25 @@ func NewService(connection portainer.Connection) (*Service, error) {
 	}, nil
 }
 
-// DBVersion retrieves the stored database version.
-func (service *Service) DBVersion() (int, error) {
+func (service *Service) SchemaVersion() (string, error) {
 	v, err := service.Version()
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 
-	return strconv.Atoi(v.SchemaVersion)
+	return v.SchemaVersion, nil
 }
 
-// Edition retrieves the stored portainer edition.
+func (service *Service) UpdateSchemaVersion(version string) error {
+	v, err := service.Version()
+	if err != nil {
+		return err
+	}
+
+	v.SchemaVersion = version
+	return service.UpdateVersion(v)
+}
+
 func (service *Service) Edition() (portainer.SoftwareEdition, error) {
 	v, err := service.Version()
 	if err != nil {
@@ -53,17 +62,6 @@ func (service *Service) Edition() (portainer.SoftwareEdition, error) {
 	}
 
 	return portainer.SoftwareEdition(v.Edition), nil
-}
-
-// StoreDBVersion store the database version.
-func (service *Service) StoreDBVersion(version int) error {
-	v, err := service.Version()
-	if err != nil {
-		return err
-	}
-
-	v.SchemaVersion = strconv.Itoa(version)
-	return service.UpdateVersion(v)
 }
 
 // IsUpdating retrieves the database updating status.
@@ -89,13 +87,18 @@ func (service *Service) InstanceID() (string, error) {
 }
 
 // StoreInstanceID store the instance ID.
-func (service *Service) StoreInstanceID(ID string) error {
+func (service *Service) StoreInstanceID(id string) error {
 	v, err := service.Version()
 	if err != nil {
-		return err
+		if !dataservices.IsErrObjectNotFound(err) {
+			return err
+		}
+
+		v = &models.Version{}
 	}
 
-	v.InstanceID = ID
+	fmt.Println("Updating instanceID", id)
+	v.InstanceID = id
 	return service.UpdateVersion(v)
 }
 
@@ -116,6 +119,13 @@ func (service *Service) UpdateVersion(version *models.Version) error {
 	return service.connection.UpdateObject(BucketName, []byte(versionKey), version)
 }
 
+// Migrate version structure from legacy version.
+// Return true if version bucket was migrated with success
 func (service *Service) Migrate() error {
-	return service.migrateLegacyVersion()
+	err := service.migrateLegacyVersion()
+	if !dataservices.IsErrObjectNotFound(err) {
+		return nil
+	}
+
+	return err
 }

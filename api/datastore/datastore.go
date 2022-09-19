@@ -13,14 +13,6 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (store *Store) version() (int, error) {
-	version, err := store.VersionService.DBVersion()
-	if store.IsErrObjectNotFound(err) {
-		version = 0
-	}
-	return version, err
-}
-
 func (store *Store) edition() portainer.SoftwareEdition {
 	edition, err := store.VersionService.Edition()
 	if store.IsErrObjectNotFound(err) {
@@ -63,19 +55,23 @@ func (store *Store) Open() (newStore bool, err error) {
 		return newStore, err
 	}
 
-	// if we have DBVersion in the database then ensure we flag this as NOT a new store
-	version, err := store.VersionService.DBVersion()
+	// if something was migrated then it's not a new store
+	err = store.VersionService.Migrate()
+	if err != nil && !store.IsErrObjectNotFound(err) {
+		return newStore, err
+	}
+
+	v, err := store.VersionService.Version()
 	if err != nil {
 		if store.IsErrObjectNotFound(err) {
-			return newStore, nil
+			return true, nil
 		}
 
 		return newStore, err
 	}
 
-	if version > 0 {
-		log.Debug().Int("version", version).Msg("opened existing store")
-
+	if v.SchemaVersion != "" {
+		log.Info().Str("store db version", v.SchemaVersion).Msg("Opened existing store")
 		return false, nil
 	}
 
