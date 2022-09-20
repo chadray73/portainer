@@ -295,7 +295,7 @@ type (
 	VersionService interface {
 		Edition() (portainer.SoftwareEdition, error)
 		InstanceID() (string, error)
-		StoreInstanceID(ID string) error
+		UpdateInstanceID(ID string) error
 		Version() (*models.Version, error)
 		UpdateVersion(*models.Version) error
 		Migrate() error

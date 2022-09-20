@@ -1,6 +1,15 @@
 package migrator
 
-// func (m *Migrator) migrateTo_2_16() error {
+func (m *Migrator) migrateSchemaTo_2_16() error {
 
-// 	return nil
-// }
+	// v, err := m.versionService.Version()
+	// if err != nil {
+	// 	return err
+	// }
+
+	// if v.BuildVersion < portainer.APIVersion {
+	// 	// do build 1 migrations
+	// }
+
+	return nil
+}

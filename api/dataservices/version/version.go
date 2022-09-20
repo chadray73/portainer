@@ -1,8 +1,6 @@
 package version
 
 import (
-	"fmt"
-
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/database/models"
 	"github.com/portainer/portainer/api/dataservices"
@@ -87,7 +85,7 @@ func (service *Service) InstanceID() (string, error) {
 }
 
 // StoreInstanceID store the instance ID.
-func (service *Service) StoreInstanceID(id string) error {
+func (service *Service) UpdateInstanceID(id string) error {
 	v, err := service.Version()
 	if err != nil {
 		if !dataservices.IsErrObjectNotFound(err) {
@@ -97,7 +95,6 @@ func (service *Service) StoreInstanceID(id string) error {
 		v = &models.Version{}
 	}
 
-	fmt.Println("Updating instanceID", id)
 	v.InstanceID = id
 	return service.UpdateVersion(v)
 }
