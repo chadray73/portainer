@@ -2799,6 +2799,8 @@
     }
   ],
   "version": {
-    "DB_VERSION": 24
+    "DB_VERSION": 24,
+    "INSTANCE_ID": "b3b5b0c0-1b1a-4b1a-9b1a-1b1a1b1a1b1a",
+    "EDITION": 1
   }
 }

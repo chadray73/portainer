@@ -921,7 +921,6 @@
   ],
   "version": {
     "DB_UPDATING": "false",
-    "DB_VERSION": "70",
-    "INSTANCE_ID": "null"
+    "VERSION": "{\"SchemaVersion\":\"2.16.0\",\"BuildVersion\":0,\"Edition\":1,\"InstanceID\":\"b3b5b0c0-1b1a-4b1a-9b1a-1b1a1b1a1b1a\"}"
   }
 }

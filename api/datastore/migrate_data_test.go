@@ -104,60 +104,61 @@ func TestMigrateData(t *testing.T) {
 		})
 	}
 
-	// t.Run("Error in MigrateData should restore backup before MigrateData", func(t *testing.T) {
-	// 	_, store, teardown := MustNewTestStore(false, true)
-	// 	defer teardown()
+	t.Run("Error in MigrateData should restore backup before MigrateData", func(t *testing.T) {
+		_, store, teardown := MustNewTestStore(false, true)
+		defer teardown()
 
-	// 	version := 17
-	// 	store.VersionService.StoreDBVersion(version)
+		v := models.Version{SchemaVersion: "1.24.1"}
+		store.VersionService.UpdateVersion(&v)
 
-	// 	store.MigrateData()
+		store.MigrateData()
 
-	// 	testVersion(store, version, t)
-	// })
+		testVersion(store, v.SchemaVersion, t)
+	})
 
-	// t.Run("MigrateData should create backup file upon update", func(t *testing.T) {
-	// 	_, store, teardown := MustNewTestStore(false, true)
-	// 	defer teardown()
-	// 	store.VersionService.StoreDBVersion(0)
+	t.Run("MigrateData should create backup file upon update", func(t *testing.T) {
+		_, store, teardown := MustNewTestStore(false, true)
+		defer teardown()
 
-	// 	store.MigrateData()
+		v := models.Version{SchemaVersion: "0.0.0"}
+		store.VersionService.UpdateVersion(&v)
 
-	// 	options := store.setupOptions(getBackupRestoreOptions(store.commonBackupDir()))
+		store.MigrateData()
 
-	// 	if !isFileExist(options.BackupPath) {
-	// 		t.Errorf("Backup file should exist; file=%s", options.BackupPath)
-	// 	}
-	// })
+		options := store.setupOptions(getBackupRestoreOptions(store.commonBackupDir()))
 
-	// t.Run("MigrateData should fail to create backup if database file is set to updating", func(t *testing.T) {
-	// 	_, store, teardown := MustNewTestStore(false, true)
-	// 	defer teardown()
+		if !isFileExist(options.BackupPath) {
+			t.Errorf("Backup file should exist; file=%s", options.BackupPath)
+		}
+	})
 
-	// 	store.VersionService.StoreIsUpdating(true)
+	t.Run("MigrateData should fail to create backup if database file is set to updating", func(t *testing.T) {
+		_, store, teardown := MustNewTestStore(false, true)
+		defer teardown()
 
-	// 	store.MigrateData()
+		store.VersionService.StoreIsUpdating(true)
 
-	// 	options := store.setupOptions(getBackupRestoreOptions(store.commonBackupDir()))
+		store.MigrateData()
 
-	// 	if isFileExist(options.BackupPath) {
-	// 		t.Errorf("Backup file should not exist for dirty database; file=%s", options.BackupPath)
-	// 	}
-	// })
+		options := store.setupOptions(getBackupRestoreOptions(store.commonBackupDir()))
 
-	// t.Run("MigrateData should not create backup on startup if portainer version matches db", func(t *testing.T) {
-	// 	_, store, teardown := MustNewTestStore(false, true)
-	// 	defer teardown()
+		if isFileExist(options.BackupPath) {
+			t.Errorf("Backup file should not exist for dirty database; file=%s", options.BackupPath)
+		}
+	})
 
-	// 	store.MigrateData()
+	t.Run("MigrateData should not create backup on startup if portainer version matches db", func(t *testing.T) {
+		_, store, teardown := MustNewTestStore(false, true)
+		defer teardown()
 
-	// 	options := store.setupOptions(getBackupRestoreOptions(store.commonBackupDir()))
+		store.MigrateData()
 
-	// 	if isFileExist(options.BackupPath) {
-	// 		t.Errorf("Backup file should not exist for dirty database; file=%s", options.BackupPath)
-	// 	}
-	// })
+		options := store.setupOptions(getBackupRestoreOptions(store.commonBackupDir()))
 
+		if isFileExist(options.BackupPath) {
+			t.Errorf("Backup file should not exist for dirty database; file=%s", options.BackupPath)
+		}
+	})
 }
 
 func Test_getBackupRestoreOptions(t *testing.T) {
@@ -313,6 +314,18 @@ func importJSON(t *testing.T, r io.Reader, store *Store) error {
 	for k, v := range objects {
 		switch k {
 		case "version":
+			// obj, ok := v.(map[string]interface{})
+			// if !ok {
+			// 	t.Logf("failed to case %s to map[string]interface{}", k)
+			// }
+			// err := con.CreateObjectWithStringId(
+			// 	k,
+			// 	[]byte("VERSION"),
+			// 	obj,
+			// )
+			// if err != nil {
+			// 	t.Logf("failed writing VERSION in %s: %v", k, err)
+			// }
 			versions, ok := v.(map[string]interface{})
 			if !ok {
 				t.Logf("failed casting %s to map[string]interface{}", k)
@@ -354,6 +367,19 @@ func importJSON(t *testing.T, r io.Reader, store *Store) error {
 			)
 			if err != nil {
 				t.Logf("failed writing INSTANCE_ID in %s: %v", k, err)
+			}
+
+			edition, ok := versions["EDITION"]
+			if !ok {
+				t.Logf("failed getting EDITION from %s", k)
+			}
+			err = con.CreateObjectWithStringId(
+				k,
+				[]byte("EDITION"),
+				edition,
+			)
+			if err != nil {
+				t.Logf("failed writing EDITION in %s: %v", k, err)
 			}
 
 		case "dockerhub":
