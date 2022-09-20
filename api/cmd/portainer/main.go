@@ -111,7 +111,6 @@ func initDataStore(flags *portainer.CLIFlags, secretKey []byte, fileService port
 	}
 
 	if isNew {
-		fmt.Println("New DB created")
 		uid := uuid.New()
 
 		// from MigrateData
@@ -132,8 +131,6 @@ func initDataStore(flags *portainer.CLIFlags, secretKey []byte, fileService port
 			log.Fatal().Err(err).Msg("failure during creation of new database")
 		}
 
-		fmt.Println("Database already initialized. Schema version:", storeVersion.SchemaVersion)
-		fmt.Println("Portainer version:", portainer.APIVersion)
 		if storeVersion.SchemaVersion != portainer.APIVersion {
 			err = store.MigrateData()
 			if err != nil {

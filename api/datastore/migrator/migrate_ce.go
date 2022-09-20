@@ -78,6 +78,7 @@ func (m *Migrator) Migrate() error {
 		newMigration("2.13", m.migrateDBVersionToDB40),
 		newMigration("2.14", m.migrateDBVersionToDB50),
 		newMigration("2.15", m.migrateDBVersionToDB60),
+		//newMigration("2.16", m.migrateSchemaTo2_16),
 	}
 
 	schemaVersion, err := semver.NewVersion(version.SchemaVersion)
@@ -85,12 +86,20 @@ func (m *Migrator) Migrate() error {
 		return migrationError(err, "invalid db schema version")
 	}
 
+	lastVersion := ""
 	for _, migration := range migrations {
 		if schemaVersion.LessThan(migration.version) {
+
+			if lastVersion != migration.version.String() {
+				log.Info().Msgf("migrating database to version %s", migration.version.String())
+			}
+
 			err := migration.migrate()
 			if err != nil {
 				return migrationError(err, GetFunctionName(migration.migrate))
 			}
+
+			lastVersion = migration.version.String()
 		}
 	}
 
