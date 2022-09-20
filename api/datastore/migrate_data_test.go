@@ -105,7 +105,7 @@ func TestMigrateData(t *testing.T) {
 	}
 
 	t.Run("Error in MigrateData should restore backup before MigrateData", func(t *testing.T) {
-		_, store, teardown := MustNewTestStore(false, true)
+		_, store, teardown := MustNewTestStore(t, false, true)
 		defer teardown()
 
 		v := models.Version{SchemaVersion: "1.24.1"}
@@ -117,7 +117,7 @@ func TestMigrateData(t *testing.T) {
 	})
 
 	t.Run("MigrateData should create backup file upon update", func(t *testing.T) {
-		_, store, teardown := MustNewTestStore(false, true)
+		_, store, teardown := MustNewTestStore(t, false, true)
 		defer teardown()
 
 		v := models.Version{SchemaVersion: "0.0.0"}
@@ -133,7 +133,7 @@ func TestMigrateData(t *testing.T) {
 	})
 
 	t.Run("MigrateData should fail to create backup if database file is set to updating", func(t *testing.T) {
-		_, store, teardown := MustNewTestStore(false, true)
+		_, store, teardown := MustNewTestStore(t, false, true)
 		defer teardown()
 
 		store.VersionService.StoreIsUpdating(true)
@@ -148,7 +148,7 @@ func TestMigrateData(t *testing.T) {
 	})
 
 	t.Run("MigrateData should not create backup on startup if portainer version matches db", func(t *testing.T) {
-		_, store, teardown := MustNewTestStore(false, true)
+		_, store, teardown := MustNewTestStore(t, false, true)
 		defer teardown()
 
 		store.MigrateData()
@@ -181,7 +181,7 @@ func Test_getBackupRestoreOptions(t *testing.T) {
 func TestRollback(t *testing.T) {
 	t.Run("Rollback should restore upgrade after backup", func(t *testing.T) {
 		version := models.Version{SchemaVersion: "2.4.0"}
-		_, store, teardown := MustNewTestStore(false, true)
+		_, store, teardown := MustNewTestStore(t, false, true)
 		defer teardown()
 
 		store.VersionService.UpdateVersion(&version)
