@@ -38,6 +38,9 @@ func GetFunctionName(i interface{}) string {
 
 // Migrate checks the database version and migrate the existing data to the most recent data model.
 func (m *Migrator) Migrate() error {
+
+	log.Info().Msg("migrating database")
+
 	// set DB to updating status
 	err := m.versionService.StoreIsUpdating(true)
 	if err != nil {
@@ -96,6 +99,10 @@ func (m *Migrator) Migrate() error {
 			m.migrateDBVersionToDB50),
 		newMigration("2.15",
 			m.migrateDBVersionToDB60),
+		newMigration("2.16",
+			m.migrateFunc1,
+			m.migrateFunc2,
+		),
 
 		// Add new migrations here...
 	}
@@ -109,7 +116,7 @@ func (m *Migrator) Migrate() error {
 
 	for _, migration := range migrations {
 		if schemaVersion.LessThan(migration.version) {
-			build = 1 // reset build number
+			build = 0 // reset build number
 
 			for _, migrationFunc := range migration.migrations {
 				err := migrationFunc()
@@ -125,6 +132,8 @@ func (m *Migrator) Migrate() error {
 						return migrationError(err, GetFunctionName(migrationFunc))
 					}
 				}
+
+				build = len(migration.migrations)
 			}
 		}
 	}

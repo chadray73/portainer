@@ -126,16 +126,9 @@ func initDataStore(flags *portainer.CLIFlags, secretKey []byte, fileService port
 			log.Fatal().Err(err).Msg("failed updating settings from flags")
 		}
 	} else {
-		storeVersion, err := store.VersionService.Version()
+		err = store.MigrateData()
 		if err != nil {
-			log.Fatal().Err(err).Msg("failure during creation of new database")
-		}
-
-		if storeVersion.SchemaVersion != portainer.APIVersion {
-			err = store.MigrateData()
-			if err != nil {
-				log.Fatal().Err(err).Msg("failed migration")
-			}
+			log.Fatal().Err(err).Msg("failed migration")
 		}
 	}
 
