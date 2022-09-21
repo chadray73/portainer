@@ -12,8 +12,13 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// !NOTE: Migration funtions should be idempotent.
+// Which simply means the function can run over the same data many times but only transform it once.
+// In practice this really just means an extra check or two to ensure we're not valid data.
+
 func (m *Migrator) initMigrations() []migrations {
-	// Do not alter the order of the migrations. Even though one looks wrong, it is not.
+	// !IMPORTANT: Do not be tempted to alter the order of these migrations.
+	// !           Even though one of them look out of order.
 	return []migrations{
 		newMigration("1.0.0", dbTooOldError), // default version found after migration
 
@@ -62,6 +67,7 @@ func (m *Migrator) initMigrations() []migrations {
 			m.migrateDBVersionToDB60),
 
 		// Add new migrations below...
+		// One function per migration, each versions migration funcs in the same file.
 	}
 }
 
@@ -118,23 +124,17 @@ func (m *Migrator) Migrate() error {
 			count = 0 // reset build number
 
 			log.Info().Msgf("migrating db to %s", migration.version.String())
-			for _, migrationFunc := range migration.migrationFuncs {
-				err := migrationFunc()
-				if err != nil {
-					return migrationError(err, GetFunctionName(migrationFunc))
-				}
+			err := runMigrations(migration.migrationFuncs)
+			if err != nil {
+				return err
 			}
 		} else if schemaVersion.Equal(migration.version) {
-			// This automated build number gets incremented whenever a new migration is added based on the length of the array.
-			// Because of merging order, we can't assume where a new migration is added.  So we run all migrations at the same version again.
-			// This requires that all migrations are idempotent. Meaning - they can run once and not change the data again.
-			// e.g.  if you're adding a new array field, check if it's not nil first.
+			// If new migrations have been added for this version then we run them all again over
+			// the same data.
 			if count < len(migration.migrationFuncs) {
-				for _, migrationFunc := range migration.migrationFuncs {
-					err := migrationFunc()
-					if err != nil {
-						return migrationError(err, GetFunctionName(migrationFunc))
-					}
+				err := runMigrations(migration.migrationFuncs)
+				if err != nil {
+					return err
 				}
 
 				count = len(migration.migrationFuncs)
@@ -154,4 +154,14 @@ func (m *Migrator) Migrate() error {
 
 	// reset DB updating status
 	return m.versionService.StoreIsUpdating(false)
+}
+
+func runMigrations(migrationFuncs []func() error) error {
+	for _, migrationFunc := range migrationFuncs {
+		err := migrationFunc()
+		if err != nil {
+			return migrationError(err, GetFunctionName(migrationFunc))
+		}
+	}
+	return nil
 }
