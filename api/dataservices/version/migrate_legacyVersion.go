@@ -7,9 +7,9 @@ import (
 )
 
 const (
-	legacyVersionKey  = "DB_VERSION"
-	legacyInstanceKey = "INSTANCE_ID"
-	legacyEditionKey  = "EDITION"
+	legacyDBVersionKey = "DB_VERSION"
+	legacyInstanceKey  = "INSTANCE_ID"
+	legacyEditionKey   = "EDITION"
 )
 
 var dbVerToSemVerMap = map[int]string{
@@ -62,7 +62,7 @@ func (service *Service) migrateLegacyVersion() error {
 	edition := 0
 	instanceId := ""
 
-	err := service.connection.GetObject(BucketName, []byte(legacyVersionKey), &dbVersion)
+	err := service.connection.GetObject(BucketName, []byte(legacyDBVersionKey), &dbVersion)
 	if err != nil {
 		return err
 	}
@@ -89,7 +89,7 @@ func (service *Service) migrateLegacyVersion() error {
 	}
 
 	// Remove legacy keys
-	service.connection.DeleteObject(BucketName, []byte(legacyVersionKey))
+	service.connection.DeleteObject(BucketName, []byte(legacyDBVersionKey))
 	service.connection.DeleteObject(BucketName, []byte(legacyEditionKey))
 	service.connection.DeleteObject(BucketName, []byte(legacyInstanceKey))
 	return nil

@@ -2,7 +2,7 @@ package models
 
 type Version struct {
 	SchemaVersion string `json:"SchemaVersion"`
-	BuildVersion  int    `json:"BuildVersion"`
+	MigratorCount int    `json:"MigratorCount"`
 	Edition       int    `json:"Edition"`
 	InstanceID    string `json:"InstanceID"`
 }

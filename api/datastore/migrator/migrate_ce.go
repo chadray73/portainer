@@ -12,48 +12,9 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type migration struct {
-	version    *semver.Version
-	migrations []func() error
-}
-
-func migrationError(err error, context string) error {
-	return werrors.Wrap(err, "failed in "+context)
-}
-
-func newMigration(v string, migrationFunc ...func() error) migration {
-	return migration{
-		version:    semver.MustParse(v),
-		migrations: migrationFunc,
-	}
-}
-
-func dbTooOldError() error {
-	return errors.New("migrating from less than Portainer 1.21.0 is not supported, please contact Portainer support.")
-}
-
-func GetFunctionName(i interface{}) string {
-	return runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
-}
-
-// Migrate checks the database version and migrate the existing data to the most recent data model.
-func (m *Migrator) Migrate() error {
-
-	log.Info().Msg("migrating database")
-
-	// set DB to updating status
-	err := m.versionService.StoreIsUpdating(true)
-	if err != nil {
-		return migrationError(err, "StoreIsUpdating")
-	}
-
-	version, err := m.versionService.Version()
-	if err != nil {
-		return migrationError(err, "get version service")
-	}
-
+func (m *Migrator) initMigrations() []migrations {
 	// Do not alter the order of the migrations. Even though one looks wrong, it is not.
-	migrations := []migration{
+	return []migrations{
 		newMigration("1.0.0", dbTooOldError), // default version found after migration
 
 		newMigration("1.21",
@@ -99,12 +60,51 @@ func (m *Migrator) Migrate() error {
 			m.migrateDBVersionToDB50),
 		newMigration("2.15",
 			m.migrateDBVersionToDB60),
-		newMigration("2.16",
-			m.migrateFunc1,
-			m.migrateFunc2,
-		),
 
-		// Add new migrations here...
+		// Add new migrations below...
+		// newMigration("2.16",
+		// 	m.migrateFunc1),
+	}
+}
+
+type migrations struct {
+	version        *semver.Version
+	migrationFuncs []func() error
+}
+
+func migrationError(err error, context string) error {
+	return werrors.Wrap(err, "failed in "+context)
+}
+
+func newMigration(v string, funcs ...func() error) migrations {
+	return migrations{
+		version:        semver.MustParse(v),
+		migrationFuncs: funcs,
+	}
+}
+
+func dbTooOldError() error {
+	return errors.New("migrating from less than Portainer 1.21.0 is not supported, please contact Portainer support.")
+}
+
+func GetFunctionName(i interface{}) string {
+	return runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
+}
+
+// Migrate checks the database version and migrate the existing data to the most recent data model.
+func (m *Migrator) Migrate() error {
+
+	log.Info().Msg("migrating database")
+
+	// set DB to updating status
+	err := m.versionService.StoreIsUpdating(true)
+	if err != nil {
+		return migrationError(err, "StoreIsUpdating")
+	}
+
+	version, err := m.versionService.Version()
+	if err != nil {
+		return migrationError(err, "get version service")
 	}
 
 	schemaVersion, err := semver.NewVersion(version.SchemaVersion)
@@ -112,34 +112,40 @@ func (m *Migrator) Migrate() error {
 		return migrationError(err, "invalid db schema version")
 	}
 
-	build := version.BuildVersion
+	migrations := m.initMigrations()
 
+	count := version.MigratorCount
 	for _, migration := range migrations {
 		if schemaVersion.LessThan(migration.version) {
-			build = 0 // reset build number
+			count = 0 // reset build number
 
-			for _, migrationFunc := range migration.migrations {
+			log.Info().Msgf("migrating db to %s", migration.version.String())
+			for _, migrationFunc := range migration.migrationFuncs {
 				err := migrationFunc()
 				if err != nil {
 					return migrationError(err, GetFunctionName(migrationFunc))
 				}
 			}
 		} else if schemaVersion.Equal(migration.version) {
-			if build < len(migration.migrations) {
-				for _, migrationFunc := range migration.migrations {
+			// This automated build number gets incremented whenever a new migration is added based on the length of the array.
+			// Because of merging order, we can't assume where a new migration is added.  So we run all migrations at the same version again.
+			// This requires that all migrations are idempotent. Meaning - they can run once and not change the data again.
+			// e.g.  if you're adding a new array field, check if it's not nil first.
+			if count < len(migration.migrationFuncs) {
+				for _, migrationFunc := range migration.migrationFuncs {
 					err := migrationFunc()
 					if err != nil {
 						return migrationError(err, GetFunctionName(migrationFunc))
 					}
 				}
 
-				build = len(migration.migrations)
+				count = len(migration.migrationFuncs)
 			}
 		}
 	}
 
 	version.SchemaVersion = portainer.APIVersion
-	version.BuildVersion = build
+	version.MigratorCount = count
 
 	err = m.versionService.UpdateVersion(version)
 	if err != nil {
