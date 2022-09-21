@@ -62,8 +62,6 @@ func (m *Migrator) initMigrations() []migrations {
 			m.migrateDBVersionToDB60),
 
 		// Add new migrations below...
-		// newMigration("2.16",
-		// 	m.migrateFunc1),
 	}
 }
 
